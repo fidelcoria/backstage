@@ -39,8 +39,6 @@ import moment from 'moment';
 import React from 'react';
 import {
   Link,
-  useApi,
-  configApiRef,
   Page,
   Header,
   HeaderLabel,
@@ -54,6 +52,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useWorkflowRunsDetails } from './useWorkflowRunsDetails';
 import { useWorkflowRunJobs } from './useWorkflowRunJobs';
 import { WorkflowRunStatusIcon } from '../WorkflowRunStatusIcon/WorkflowRunStatusIcon';
+import { useProjectName } from '../useProjectName';
 
 const useStyles = makeStyles<Theme>(theme => ({
   root: {
@@ -153,9 +152,7 @@ const JobListItem = ({ job, className }: { job: Job; className: string }) => {
  * A component for Jobs visualization. Jobs are a property of a Workflow Run.
  */
 export const WorkflowRunDetailsPage = () => {
-  const configApi = useApi(configApiRef);
-  const repo = configApi.getString('github-actions.repo');
-  const owner = configApi.getString('github-actions.owner');
+  const [owner, repo] = (useProjectName() ?? '/').split('/');
   const details = useWorkflowRunsDetails(repo, owner);
   const jobs = useWorkflowRunJobs(details.value?.jobs_url);
 

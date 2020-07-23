@@ -141,17 +141,8 @@ const WorkflowRunsTableView: FC<Props> = ({
   );
 };
 
-export const WorkflowRunsTable = ({
-  repo,
-  owner,
-}: {
-  repo: string;
-  owner: string;
-}) => {
-  const [tableProps, { retry, setPage, setPageSize }] = useWorkflowRuns({
-    repo,
-    owner,
-  });
+export const WorkflowRunsTable = () => {
+  const [tableProps, { retry, setPage, setPageSize }] = useWorkflowRuns();
   return (
     <WorkflowRunsTableView
       {...tableProps}

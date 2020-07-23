@@ -19,16 +19,9 @@ import { WorkflowRun } from './WorkflowRunsTable';
 import { githubActionsApiRef } from '../../api/GithubActionsApi';
 import { useApi, githubAuthApiRef, errorApiRef } from '@backstage/core';
 import { ActionsListWorkflowRunsForRepoResponseData } from '@octokit/types';
-import { catalogApiRef } from '@backstage/plugin-catalog';
+import { useProjectName } from '../useProjectName';
 
-export function useWorkflowRuns({
-  repo,
-  owner,
-}: {
-  repo: string;
-  owner: string;
-}) {
-  const catalogApi = useApi(catalogApiRef);
+export function useWorkflowRuns() {
   const api = useApi(githubActionsApiRef);
   const auth = useApi(githubAuthApiRef);
 
@@ -40,15 +33,12 @@ export function useWorkflowRuns({
 
   const reRunWorkflow = async () => {};
 
+  const projectName = useProjectName();
   const { loading, value: runs, retry } = useAsyncRetry<
     WorkflowRun[]
   >(async () => {
     const token = await auth.getAccessToken(['repo', 'user']);
-    const entity = await catalogApi.getEntityByName({
-      kind: 'Component',
-      name: 'backstage-site',
-    });
-    console.log(entity);
+    const [owner, repo] = (projectName ?? '/').split('/');
     return (
       api
         // GitHub API pagination count starts from 1
@@ -90,16 +80,15 @@ export function useWorkflowRuns({
           },
         )
     );
-  }, [page, pageSize]);
+  }, [page, pageSize, projectName]);
 
-  const projectName = `${owner}/${repo}`;
   return [
     {
       page,
       pageSize,
       loading,
       runs,
-      projectName,
+      projectName: projectName ?? '',
       total,
     },
     {
