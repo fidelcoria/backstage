@@ -6,7 +6,7 @@ on:
       - '.github/workflows/scaffolder.yml'
       - './plugins/scaffolder-backend/scripts'
   push:
-    branches: [master]
+    branches: [fork-master]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -30,4 +30,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
           tag_with_ref: true
-          push: true
+          # push: true
+          push: false

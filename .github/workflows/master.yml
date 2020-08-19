@@ -2,7 +2,7 @@ name: Master Build
 
 on:
   push:
-    branches: [master]
+    branches: [fork-master]
 
 jobs:
   build:
@@ -58,14 +58,14 @@ jobs:
         run: yarn lerna -- run test -- --coverage
 
       # Publishes current version of packages that are not already present in the registry
-      - name: publish
-        run: yarn lerna -- publish from-package --yes
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - name: publish
+      #   run: yarn lerna -- publish from-package --yes
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Tags the commit with the version in the core package if the tag doesn't exist
-      - uses: Klemensas/action-autotag@1.2.3
-        with:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          package_root: "packages/core"
-          tag_prefix: "v"
+      # - uses: Klemensas/action-autotag@1.2.3
+      #   with:
+      #     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      #     package_root: "packages/core"
+      #     tag_prefix: "v"
