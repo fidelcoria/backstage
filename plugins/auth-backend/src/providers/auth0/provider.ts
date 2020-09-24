@@ -16,36 +16,47 @@
 
 import express from 'express';
 import passport from 'passport';
-import Auth0Strategy, { Auth0StrategyOptionsWithRequest } from './strategy';
-import { Logger } from 'winston';
-import { TokenIssuer } from '../../identity';
-import { OAuthProvider } from '../../lib/OAuthProvider';
+import Auth0Strategy from './strategy';
+import {
+  OAuthAdapter,
+  OAuthProviderOptions,
+  OAuthHandlers,
+  OAuthResponse,
+  OAuthEnvironmentHandler,
+  OAuthStartRequest,
+  encodeState,
+  OAuthRefreshRequest,
+} from '../../lib/oauth';
 import {
   executeFetchUserProfileStrategy,
   executeFrameHandlerStrategy,
   executeRedirectStrategy,
   executeRefreshTokenStrategy,
   makeProfileInfo,
-} from '../../lib/PassportStrategyHelper';
-import {
-  AuthProviderConfig,
-  OAuthProviderHandlers,
-  OAuthResponse,
   PassportDoneCallback,
-  RedirectInfo,
-} from '../types';
-import { Config } from '@backstage/config';
+} from '../../lib/passport';
+import { RedirectInfo, AuthProviderFactory } from '../types';
 
 type PrivateInfo = {
   refreshToken: string;
 };
 
-export class Auth0AuthProvider implements OAuthProviderHandlers {
+export type Auth0AuthProviderOptions = OAuthProviderOptions & {
+  domain: string;
+};
+
+export class Auth0AuthProvider implements OAuthHandlers {
   private readonly _strategy: Auth0Strategy;
 
-  constructor(options: Auth0StrategyOptionsWithRequest) {
+  constructor(options: Auth0AuthProviderOptions) {
     this._strategy = new Auth0Strategy(
-      options,
+      {
+        clientID: options.clientId,
+        clientSecret: options.clientSecret,
+        callbackURL: options.callbackUrl,
+        domain: options.domain,
+        passReqToCallback: false as true,
+      },
       (
         accessToken: any,
         refreshToken: any,
@@ -73,16 +84,13 @@ export class Auth0AuthProvider implements OAuthProviderHandlers {
     );
   }
 
-  async start(
-    req: express.Request,
-    options: Record<string, string>,
-  ): Promise<RedirectInfo> {
-    const providerOptions = {
-      ...options,
+  async start(req: OAuthStartRequest): Promise<RedirectInfo> {
+    return await executeRedirectStrategy(req, this._strategy, {
       accessType: 'offline',
       prompt: 'consent',
-    };
-    return await executeRedirectStrategy(req, this._strategy, providerOptions);
+      scope: req.scope,
+      state: encodeState(req.state),
+    });
   }
 
   async handler(
@@ -99,11 +107,11 @@ export class Auth0AuthProvider implements OAuthProviderHandlers {
     };
   }
 
-  async refresh(refreshToken: string, scope: string): Promise<OAuthResponse> {
+  async refresh(req: OAuthRefreshRequest): Promise<OAuthResponse> {
     const { accessToken, params } = await executeRefreshTokenStrategy(
       this._strategy,
-      refreshToken,
-      scope,
+      req.refreshToken,
+      req.scope,
     );
 
     const profile = await executeFetchUserProfileStrategy(
@@ -140,47 +148,28 @@ export class Auth0AuthProvider implements OAuthProviderHandlers {
   }
 }
 
-export function createAuth0Provider(
-  { baseUrl }: AuthProviderConfig,
-  _: string,
-  envConfig: Config,
-  logger: Logger,
-  tokenIssuer: TokenIssuer,
-) {
-  const providerId = 'auth0';
-  const secure = envConfig.getBoolean('secure');
-  const appOrigin = envConfig.getString('appOrigin');
-  const clientID = envConfig.getString('clientId');
-  const clientSecret = envConfig.getString('clientSecret');
-  const domain = envConfig.getString('domain');
-  const callbackURL = `${baseUrl}/${providerId}/handler/frame`;
+export const createAuth0Provider: AuthProviderFactory = ({
+  globalConfig,
+  config,
+  tokenIssuer,
+}) =>
+  OAuthEnvironmentHandler.mapConfig(config, envConfig => {
+    const providerId = 'auth0';
+    const clientId = envConfig.getString('clientId');
+    const clientSecret = envConfig.getString('clientSecret');
+    const domain = envConfig.getString('domain');
+    const callbackUrl = `${globalConfig.baseUrl}/${providerId}/handler/frame`;
 
-  const opts = {
-    clientID,
-    clientSecret,
-    callbackURL,
-    domain,
-  } as Auth0StrategyOptionsWithRequest;
+    const provider = new Auth0AuthProvider({
+      clientId,
+      clientSecret,
+      callbackUrl,
+      domain,
+    });
 
-  if (!opts.clientID || !opts.clientSecret || !opts.domain) {
-    if (process.env.NODE_ENV !== 'development') {
-      throw new Error(
-        'Failed to initialize Auth0 auth provider, set AUTH_AUTH0_CLIENT_ID, AUTH_AUTH0_CLIENT_SECRET, and AUTH_AUTH0_DOMAIN env vars',
-      );
-    }
-
-    logger.warn(
-      'Auth0 auth provider disabled, set AUTH_AUTH0_CLIENT_ID, AUTH_AUTH0_CLIENT_SECRET, and AUTH_AUTH0_DOMAIN env vars to enable',
-    );
-    return undefined;
-  }
-
-  return new OAuthProvider(new Auth0AuthProvider(opts), {
-    disableRefresh: true,
-    providerId,
-    secure,
-    baseUrl,
-    appOrigin,
-    tokenIssuer,
+    return OAuthAdapter.fromConfig(globalConfig, provider, {
+      disableRefresh: true,
+      providerId,
+      tokenIssuer,
+    });
   });
-}

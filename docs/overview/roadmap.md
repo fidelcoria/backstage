@@ -5,13 +5,11 @@ title: Project roadmap
 
 ## Current status
 
-> Backstage is currently in Alpha. This means that you can expect APIs and
-> features to change until we reach our
-> [Backstage Beta milestone](https://github.com/spotify/backstage/milestone/19).
-> Before we have API stability, plugins will need ongoing maintenance. It is
-> also recommended that teams who adopt Backstage today upgrades their
-> installation as new [releases](https://github.com/spotify/backstage/releases)
-> are available.
+> Backstage is currently under rapid development. This means that you can expect
+> APIs and features to evolve. It is also recommended that teams who adopt
+> Backstage today upgrade their installation as new
+> [releases](https://github.com/spotify/backstage/releases) become available, as
+> Backwards compatibility is not yet guaranteed.
 
 ## Phases
 
@@ -81,17 +79,25 @@ guidelines to get started.
 
 - Further improvements to platform documentation
 
+### Plugins
+
+Building and maintaining [plugins](https://backstage.io/plugins) is the work of
+the entire Backstage community.
+
+A list of plugins that are in development is
+[available here](https://github.com/spotify/backstage/issues?q=is%3Aissue+is%3Aopen+label%3Aplugin+sort%3Areactions-%2B1-desc).
+We strongly recommend to upvote 👍 plugins you are interested in. This helps us
+and the community prioritize what plugins to build.
+
+Are you missing a plugin for your favorite tool? Please
+[suggest a new one](https://github.com/spotify/backstage/issues/new?labels=plugin&template=plugin_template.md&title=%5BPlugin%5D+THE+PLUGIN+NAME).
+Chances are that someone will jump in and help build it.
+
 ### Future work 🔮
 
-- **[Backstage Beta](https://github.com/spotify/backstage/milestone/19)** - The
-  platform APIs and features are stable and can be dependent on for production
-  use. After this plugins will require little to no maintenance.
-
-- **[Plugin marketplace](https://github.com/spotify/backstage/issues/2009)** -
-  As the ecosystem of Backstage plugins continues to grow it is becoming
-  increasingly hard to keep track of what plugins are available. To solve this
-  we imagine a "Plugin marketplace" that helps with discovery and installation
-  of plugins.
+- **[Backstage platform is stable](https://github.com/spotify/backstage/milestone/19)** -
+  The platform APIs and features are stable and can be depended on for
+  production use. After this plugins will require little to no maintenance.
 
 - **Deploy a product demo at `demo.backstage.io`** - Deploy a typical Backstage
   deployment available publicly so that people can click around and get a feel
@@ -113,6 +119,7 @@ guidelines to get started.
 
 ### Completed milestones ✅
 
+- [Plugin marketplace](https://backstage.io/plugins)
 - [Improved and move documentation to backstage.io](https://backstage.io/docs/overview/what-is-backstage)
 - [Backstage Service Catalog (alpha)](https://backstage.io/blog/2020/06/22/backstage-service-catalog-alpha)
 - [Backstage Software Templates (alpha)](https://backstage.io/blog/2020/08/05/announcing-backstage-software-templates)

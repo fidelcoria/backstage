@@ -15,43 +15,20 @@
  */
 
 import Auth0Icon from '@material-ui/icons/AcUnit';
-import { DefaultAuthConnector } from '../../../../lib/AuthConnector';
-import { Auth0Session } from './types';
+import { auth0AuthApiRef } from '../../../definitions/auth';
 import {
-  OpenIdConnectApi,
-  ProfileInfoApi,
-  ProfileInfo,
-  SessionStateApi,
-  SessionState,
-  BackstageIdentityApi,
-  AuthRequestOptions,
-  BackstageIdentity,
-} from '../../../definitions/auth';
-import { OAuthRequestApi, AuthProvider } from '../../../definitions';
-import { SessionManager } from '../../../../lib/AuthSessionManager/types';
-import { RefreshingAuthSessionManager } from '../../../../lib/AuthSessionManager';
-import { Observable } from '../../../../types';
+  OAuthRequestApi,
+  AuthProvider,
+  DiscoveryApi,
+} from '../../../definitions';
+import { OAuth2 } from '../oauth2';
 
 type CreateOptions = {
-  // TODO(Following the words of Rugvip): These two should be grabbed from global config when available, they're not unique to Auth0Auth
-  apiOrigin: string;
-  basePath: string;
-
+  discoveryApi: DiscoveryApi;
   oauthRequestApi: OAuthRequestApi;
 
   environment?: string;
   provider?: AuthProvider & { id: string };
-};
-
-export type Auth0AuthResponse = {
-  providerInfo: {
-    accessToken: string;
-    idToken: string;
-    scope: string;
-    expiresInSeconds: number;
-  };
-  profile: ProfileInfo;
-  backstageIdentity: BackstageIdentity;
 };
 
 const DEFAULT_PROVIDER = {
@@ -60,95 +37,21 @@ const DEFAULT_PROVIDER = {
   icon: Auth0Icon,
 };
 
-class Auth0Auth
-  implements
-    OpenIdConnectApi,
-    ProfileInfoApi,
-    BackstageIdentityApi,
-    SessionStateApi {
+class Auth0Auth {
   static create({
-    apiOrigin,
-    basePath,
+    discoveryApi,
     environment = 'development',
     provider = DEFAULT_PROVIDER,
     oauthRequestApi,
-  }: CreateOptions) {
-    const connector = new DefaultAuthConnector({
-      apiOrigin,
-      basePath,
-      environment,
+  }: CreateOptions): typeof auth0AuthApiRef.T {
+    return OAuth2.create({
+      discoveryApi,
+      oauthRequestApi,
       provider,
-      oauthRequestApi: oauthRequestApi,
-      sessionTransform(res: Auth0AuthResponse): Auth0Session {
-        return {
-          ...res,
-          providerInfo: {
-            idToken: res.providerInfo.idToken,
-            accessToken: res.providerInfo.accessToken,
-            scopes: Auth0Auth.normalizeScopes(res.providerInfo.scope),
-            expiresAt: new Date(
-              Date.now() + res.providerInfo.expiresInSeconds * 1000,
-            ),
-          },
-        };
-      },
+      environment,
+      defaultScopes: ['openid', `email`, `profile`],
     });
-
-    const sessionManager = new RefreshingAuthSessionManager({
-      connector,
-      defaultScopes: new Set([
-        'openid',
-        `email`,
-        `profile`,
-      ]),
-      sessionScopes: (session: Auth0Session) => session.providerInfo.scopes,
-      sessionShouldRefresh: (session: Auth0Session) => {
-        const expiresInSec =
-          (session.providerInfo.expiresAt.getTime() - Date.now()) / 1000;
-        return expiresInSec < 60 * 5;
-      },
-    });
-
-    return new Auth0Auth(sessionManager);
-  }
-
-  sessionState$(): Observable<SessionState> {
-    return this.sessionManager.sessionState$();
-  }
-
-  constructor(private readonly sessionManager: SessionManager<Auth0Session>) {}
-
-  async getIdToken(options: AuthRequestOptions = {}) {
-    const session = await this.sessionManager.getSession(options);
-    return session?.providerInfo.idToken ?? '';
-  }
-
-  async logout() {
-    await this.sessionManager.removeSession();
-  }
-
-  async getBackstageIdentity(
-    options: AuthRequestOptions = {},
-  ): Promise<BackstageIdentity | undefined> {
-    const session = await this.sessionManager.getSession(options);
-    return session?.backstageIdentity;
-  }
-
-  async getProfile(options: AuthRequestOptions = {}) {
-    const session = await this.sessionManager.getSession(options);
-    return session?.profile;
-  }
-
-  static normalizeScopes(scope?: string | string[]): Set<string> {
-    if (!scope) {
-      return new Set();
-    }
-
-    const scopeList = Array.isArray(scope)
-      ? scope
-      : scope.split(/[\s|,]/).filter(Boolean);
-
-    return new Set(scopeList);
   }
 }
+
 export default Auth0Auth;

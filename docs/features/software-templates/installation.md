@@ -1,4 +1,7 @@
-# Installing in your Backstage App
+---
+id: installation
+title: Installing in your Backstage App
+---
 
 The scaffolder plugin comes in two packages, `@backstage/plugin-scaffolder` and
 `@backstage/plugin-scaffolder-backend`. Each has their own installation steps,
@@ -109,7 +112,7 @@ export default async function createPlugin({ logger }: PluginEnvironment) {
   preparers.register('file', filePreparer);
   preparers.register('github', githubPreparer);
 
-  // Create Github client with your access token from environment variables
+  // Create GitHub client with your access token from environment variables
   const githubClient = new Octokit({ auth: process.env.GITHUB_ACCESS_TOKEN });
   const publisher = new GithubPublisher({ client: githubClient });
 
