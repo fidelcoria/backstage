@@ -1,5 +1,13 @@
 # @backstage/plugin-scaffolder
 
+## 0.3.1
+
+### Patch Changes
+
+- ef2831dde: Move constructing the catalog-info.yaml URL for scaffolded components to the publishers
+- Updated dependencies [475fc0aaa]
+  - @backstage/core@0.3.2
+
 ## 0.3.0
 
 ### Minor Changes

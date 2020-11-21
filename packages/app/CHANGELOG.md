@@ -1,5 +1,24 @@
 # example-app
 
+## 0.2.3
+
+### Patch Changes
+
+- 475fc0aaa: Using the search field in the sidebar now navigates to the search result page.
+- Updated dependencies [475fc0aaa]
+- Updated dependencies [29a0ccab2]
+- Updated dependencies [8e6728e25]
+- Updated dependencies [c93a14b49]
+- Updated dependencies [ef2831dde]
+- Updated dependencies [2a71f4bab]
+- Updated dependencies [475fc0aaa]
+  - @backstage/core@0.3.2
+  - @backstage/cli@0.3.1
+  - @backstage/plugin-cost-insights@0.4.1
+  - @backstage/plugin-scaffolder@0.3.1
+  - @backstage/plugin-register-component@0.2.2
+  - @backstage/plugin-search@0.2.1
+
 ## 0.2.2
 
 ### Patch Changes

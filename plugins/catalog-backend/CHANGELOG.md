@@ -1,5 +1,13 @@
 # @backstage/plugin-catalog-backend
 
+## 0.2.2
+
+### Patch Changes
+
+- 0c2121240: Add support for reading groups and users from the Microsoft Graph API.
+- Updated dependencies [bff3305aa]
+  - @backstage/backend-common@0.3.1
+
 ## 0.2.1
 
 ### Patch Changes

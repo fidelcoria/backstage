@@ -1,5 +1,11 @@
 # @backstage/cli
 
+## 0.3.1
+
+### Patch Changes
+
+- 29a0ccab2: The CLI now detects and transforms linked packages. You can link in external packages by adding them to both the `lerna.json` and `package.json` workspace paths.
+
 ## 0.3.0
 
 ### Minor Changes
