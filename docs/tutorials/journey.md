@@ -1,6 +1,7 @@
 ---
 id: journey
 title: Future developer journey
+description: This document describes a possible journey of a future Backstage
 ---
 
 > This document describes a possible journey of a **_future_** Backstage plugin
@@ -21,7 +22,7 @@ music and wants to have a theme tune for every service in Backstage.
 
 Sam built a Spotify plugin for Backstage that allows service owners to define a
 theme tune for their service. The theme tune plays whenever a user visits the
-service page in Backstage. The plugin is published to NPM and available for any
+service page in Backstage. The plugin is published to npm and available for any
 organization to easily install and add to their Backstage installation.
 
 # 1. A New Plugin
@@ -133,7 +134,7 @@ work.
 # 5. The First User
 
 At this point the only things that anyone that wants to use Sam's plugin needs
-to do is to add
+to do are to add
 https://raw.githubusercontent.com/sam/backstage-spotify-theme/master/annotation.json#/sam.wise/spotify-track-id
 to their catalog schema, import and add the `PlayerWidget` on the desired entity
 template pages, and make sure they're providing Spotify auth.
@@ -144,7 +145,7 @@ select a theme tune when creating a new component. Sam jumps on the idea and
 adds a new creation hook that is exported by the plugin. The hook can be
 installed either in a single, all, or component templates that match a label. It
 adds a field as a part of the component creation process with a nice search box
-that allow users to search for a track that they want to use as the theme tune.
+that allows users to search for a track that they want to use as the theme tune.
 
 # 6. Return to the Repo
 
@@ -178,7 +179,7 @@ const onSave = async () => {
 ```
 
 Now it's much simpler for users to change the theme tune, as they no longer need
-to go look up a track ID and edit a yaml file. Instead, they can now stay inside
+to go look up a track ID and edit a YAML file. Instead, they can now stay inside
 Backstage and search for the track and request the change from there. In
 addition, the requested change can be reviewed by the regular process of each
 organization.
@@ -202,7 +203,7 @@ backend plugin also extends the common GraphQL schema with a mutation that
 updates the track ID in the database.
 
 On the frontend the Pull Request doesn't change much. It defines the save action
-the was previously using the `RepoApi` in it's own API.
+the was previously using the `RepoApi` in its own API.
 
 ```ts
 type ThemeTuneStorageApi = {
@@ -238,15 +239,15 @@ hits merge.
 # 8. Attack of the Clones
 
 Sam just released v1.8.4 of the plugin, and at this point it's so popular that a
-couple of other plugins has started depending on the `sam.wise/spotify-track-id`
-annotation. One such plugin being the `spotify-album-art` plugin that can
-display the album art of the theme tune as the background of the entity header.
-Sam thinks it's all pretty cool, but doesn't like that the annotation that was
-once an internal concern of the plugin is now becoming a standard in the
-community.
+couple of other plugins have started depending on the
+`sam.wise/spotify-track-id` annotation. One such plugin being the
+`spotify-album-art` plugin that can display the album art of the theme tune as
+the background of the entity header. Sam thinks it's all pretty cool, but
+doesn't like that the annotation that was once an internal concern of the plugin
+is now becoming a standard in the community.
 
 In order to standardize the annotation in Backstage, Sam submits a Pull Request
-to the Backstage Core repo. The request suggest a new well-known metadata
+to the Backstage Core repo. The request suggests a new well-known metadata
 annotation called `spotify.com/track-id`, with the same schema definition as
 Sam's label, and refers to Sam's own plugin and the `spotify-album-art` plugin
 as existing usages. The Backstage maintainers merge the Pull Request, after
@@ -263,14 +264,9 @@ release of Sam's plugin specifies a dependency on Backstage with a minimum
 version set to the same release as the one were the annotation was added to the
 core schema.
 
-<details>
-  <summary></summary>
-
 # 9. Revenge of the Sam
 
 Sam, now in full control of all theme tunes in Backstage, releases v2.0.1, which
 switches all tracks to 4uLU6hMCjMI75M1A2tKUQC. Sam wanted to do something more
 nefarious, but since Backstage sandboxes sensitive actions and is mostly
 read-only with strict CSP, Sam's hands were tied.
-
-</details>

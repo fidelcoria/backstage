@@ -1,27 +1,28 @@
 ---
 id: extending-publisher
 title: Create your own Publisher
+description: Documentation on Creating your own Publisher
 ---
 
 Publishers are responsible for pushing and storing the templated skeleton after
 the values have been templated by the `Templater`. See
 [Create your own templater](./create-your-own-templater.md) for more info.
 
-They receive a directory or location where the templater has sucessfully run and
-is now ready to store somewhere. They also are given some other options which
-are sent from the frontend, such as the `storePath` which is a string of where
-the frontend thinks we should save this templated folder.
+They receive a directory or location where the templater has successfully run
+and is now ready to store somewhere. They also are given some other options
+which are sent from the frontend, such as the `storePath` which is a string of
+where the frontend thinks we should save this templated folder.
 
 Currently we provide the following `publishers`:
 
 - `github`
 
 This publisher is passed through to the `createRouter` function of the
-`@spotify/plugin-scaffolder-backend`. Currently, only one publisher is
+`@backstage/plugin-scaffolder-backend`. Currently, only one publisher is
 supported, but PR's are always welcome.
 
 An full example backend can be found
-[here](https://github.com/spotify/backstage/blob/d91c10f654475a60829fa33a5c81018e517a319a/packages/backend/src/plugins/scaffolder.ts),
+[here](https://github.com/backstage/backstage/blob/d91c10f654475a60829fa33a5c81018e517a319a/packages/backend/src/plugins/scaffolder.ts),
 but it looks something like the following
 
 ```ts
@@ -33,7 +34,7 @@ import { Octokit } from '@octokit/rest';
 import type { PluginEnvironment } from '../types';
 
 export default async function createPlugin({ logger }: PluginEnvironment) {
-  const githubClient = new Octokit({ auth: process.env.GITHUB_ACCESS_TOKEN });
+  const githubClient = new Octokit({ auth: process.env.GITHUB_TOKEN });
   const publisher = new GithubPublisher({ client: githubClient });
 
   return await createRouter({
@@ -81,7 +82,7 @@ Now it's up to you to implement the `publish` function and return
 
 Some good examples exist here:
 
-- https://github.com/spotify/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/stages/publish/github.ts
+- https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/stages/publish/github.ts
 
 ### Registering your own Publisher
 

@@ -1,6 +1,7 @@
 ---
 id: utility-apis
 title: Utility APIs
+description: Backstage Utility APIs
 ---
 
 ## Introduction
@@ -10,7 +11,7 @@ possible residing within the plugin itself and its backend APIs. There will
 however always be a need for plugins to communicate outside of its boundaries,
 both with other plugins and the app itself.
 
-Backstage provides two primary methods for plugins to communication across their
+Backstage provides two primary methods for plugins to communicate across their
 boundaries in client-side code. The first one being the `createPlugin` API and
 the registration hooks passed to the `register` method, and the second one being
 Utility APIs. While the `createPlugin` API is focused on the initialization
@@ -21,7 +22,7 @@ during their entire life cycle.
 
 Each Utility API is tied to an `ApiRef` instance, which is a global singleton
 object without any additional state or functionality, its only purpose is to
-reference Utility APIs. `ApiRef`s are create using `createApiRef`, which is
+reference Utility APIs. `ApiRef`s are created using `createApiRef`, which is
 exported by `@backstage/core`. There are many
 [predefined Utility APIs](../reference/utility-apis/README.md) defined in
 `@backstage/core`, and they're all exported with a name of the pattern
@@ -32,10 +33,10 @@ hook exported by `@backstage/core`, or the `withApis` HOC if you prefer class
 components. For example, the `ErrorApi` can be accessed like this:
 
 ```tsx
-import React, { FC } from 'react';
+import React from 'react';
 import { useApi, errorApiRef } from '@backstage/core';
 
-export const MyComponent: FC<{}> = () => {
+export const MyComponent = () => {
   const errorApi = useApi(errorApiRef);
 
   // Signal to the app that something went wrong, and display the error to the user.
@@ -96,7 +97,7 @@ app, and the app itself.
 
 ### Core APIs
 
-Starting with the Backstage core library, it provides implementation for all of
+Starting with the Backstage core library, it provides implementations for all of
 the core APIs. The core APIs are the ones exported by `@backstage/core`, such as
 the `errorApiRef` and `configApiRef`. You can find a full list of them
 [here](../reference/utility-apis/README.md).
@@ -112,7 +113,7 @@ While doing so they should usually also provide default implementations of their
 own APIs, for example, the `catalog` plugin exports `catalogApiRef`, and also
 supplies a default `ApiFactory` of that API using the `CatalogClient`. There is
 one restriction to plugin-provided API Factories: plugins may not supply
-factories for core APIs, trying to do so will cause the app to crash.
+factories for core APIs, trying to do so will cause the app to refuse to start.
 
 Plugins supply their APIs through the `apis` option of `createPlugin`, for
 example:
@@ -159,7 +160,8 @@ const app = createApp({
 ```
 
 A common pattern is to export a list of all APIs from `apis.ts`, next to
-`App.tsx`. See the [example app in this repo](../../packages/app/src/apis.ts)
+`App.tsx`. See the
+[example app in this repo](https://github.com/backstage/backstage/blob/master/packages/app/src/apis.ts)
 for an example.
 
 ## Custom implementations of Utility APIs
@@ -193,8 +195,8 @@ interface for the API, and create an `ApiRef` using `createApiRef` exported from
 `@backstage/core`. Also be sure to provide at least one implementation of the
 API, and to declare a default factory for the API in `createPlugin`.
 
-Custom Utility APIs can be either public or private, which it is up to the
-plugin to choose. Private APIs do not expose an external API surface, and it's
+Custom Utility APIs can be either public or private, which is up to the plugin
+to choose. Private APIs do not expose an external API surface, and it's
 therefore possible to make breaking changes to the API without affecting other
 users of the plugin. If an API is made public however, it opens up for other
 plugins to make use of the API, and it also makes it possible for users for your
@@ -241,14 +243,14 @@ The figure below shows the relationship between
 The current method for connecting Utility API providers and consumers is via the
 React tree using an `ApiProvider`, which is added to the `AppProvider` of the
 `App`. In the future there may potentially be more ways to do this, in ways that
-are not tied to react. A design goal of the Utility APIs was to not have them
+are not tied to React. A design goal of the Utility APIs was to not have them
 directly tied to React.
 
 The indirection provided by Utility APIs also makes it straightforward to test
 components that depend on APIs, and to provide a standard common development
 environment for plugins. A proper test wrapper with mocked API implementations
-is not yet ready, but it will provided as a part of `@backstage/test-utils`. It
-will provide mocked variants of APIs, with additional methods for asserting a
+is not yet ready, but it will be provided as a part of `@backstage/test-utils`.
+It will provide mocked variants of APIs, with additional methods for asserting a
 component's interaction with the API.
 
 The common development environment for plugins is included in

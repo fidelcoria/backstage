@@ -1,6 +1,7 @@
 ---
 id: writing
 title: Writing Backstage Configuration Files
+description: Documentation on Writing Backstage Configuration Files
 ---
 
 ## File Format
@@ -18,7 +19,7 @@ backend:
   baseUrl: http://localhost:7000
 
 organization:
-  name: Spotify
+  name: CNCF
 
 proxy:
   /my/api:
@@ -54,19 +55,28 @@ picked up by the serve tasks of `@backstage/cli` for local development, and are
 injected by the entrypoint of the nginx container serving the frontend in a
 production build.
 
-## File Resolution
+## Configuration Files
 
 It is possible to have multiple configuration files, both to support different
 environments, but also to define configuration that is local to specific
-packages.
+packages. The configuration files to load are selected using a `--config <path>`
+flag, and it is possible to load any number of files. Paths are relative to the
+working directory of the executed process, for example `package/backend`. This
+means that to select a config file in the repo root when running the backend,
+you would use `--config ../../my-config.yaml`.
 
-All `app-config.yaml` files inside the monorepo root and package root are
-considered, as are files with additional `local` and environment affixes such as
-`development`, for example `app-config.local.yaml`,
-`app-config.production.yaml`, and `app-config.development.local.yaml`. Which
-environment config files are loaded is determined by the `NODE_ENV` environment
-variable. Local configuration files are always loaded, but are meant for local
-development overrides and should typically be `.gitignore`'d.
+If no `config` flags are specified, the default behavior is to load
+`app-config.yaml` and, if it exists, `app-config.local.yaml` from the repo root.
+In the provided project setup, `app-config.local.yaml` is `.gitignore`'d, making
+it a good place to add config overrides and secrets for local development.
+
+Note that if any config flags are provided, the default `app-config.yaml` files
+are NOT loaded. To include them you need to explicitly include them with a flag,
+for example:
+
+```shell
+yarn start --config ../../app-config.yaml --config ../../app-config.staging.yaml
+```
 
 All loaded configuration files are merged together using the following rules:
 
@@ -82,35 +92,30 @@ order:
 
 - Configuration from the `APP_CONFIG_` environment variables has the highest
   priority, followed by files.
-- Files inside package directories have higher priority than those in the root
-  directory.
-- Files with environment affixes have higher priority than ones without.
-- Files with the `local` affix have higher priority than ones without.
+- Files loaded with config flags are ordered by priority, where the last flag
+  has the highest priority.
+- If no config flags are provided, `app-config.local.yaml` has higher priority
+  than `app-config.yaml`.
 
-## Secrets
+## Secrets and Dynamic Data
 
-Secrets are supported via a special `$secret` key, which in turn provides a
-number of different ways to read in secrets. To load a configuration value as a
-secret, supply an object with a single `$secret` key, and within that supply an
-object that describes how the secret is loaded. For example, the following will
-read the config key `backend.mySecretKey` from the environment variable
-`MY_SECRET_KEY`:
+Secrets are supported via special data loading keys that are prefixed with `$`,
+which in turn provide a number of different ways to read in secrets. To load a
+configuration value as a secret, supply an object with one of the special secret
+keys, for example `$env` or `$file`. A full list of supported secret keys can be
+found below. For example, the following will read the config key
+`backend.mySecretKey` from the environment variable `MY_SECRET_KEY`:
 
 ```yaml
 backend:
   mySecretKey:
-    $secret:
-      env: MY_SECRET_KEY
+    $env: MY_SECRET_KEY
 ```
 
 With the above configuration, calling `config.getString('backend.mySecretKey')`
 will return the value of the environment variable `MY_SECRET_KEY` when the
 backend started up. All secrets are loaded at startup, so changing the contents
 of secret files or environment variables will not be reflected at runtime.
-
-Note that secrets will never be included in the frontend bundle or development
-builds. When loading configuration you have to explicitly enable reading of
-secrets, which is only done for the backend configuration.
 
 As hinted at, secrets can be loaded from a bunch of different sources, and can
 be extended with more. Below is a list of the currently supported methods for
@@ -122,8 +127,7 @@ This reads a secret from an environment variable. For example, the following
 config loads the secret from the `MY_SECRET` env var.
 
 ```yaml
-$secret:
-  env: MY_SECRET
+$env: MY_SECRET
 ```
 
 ### File Secrets
@@ -134,24 +138,24 @@ following reads the contents of `my-secret.txt` relative to the config file
 itself:
 
 ```yaml
-$secret:
-  file: ./my-secret.txt
+$file: ./my-secret.txt
 ```
 
 ### Data File Secrets
 
 This reads secrets from a path within a JSON-like data file. The file path
-behaves similar to file secrets, but in addition a `path` is used to point to a
-specific value inside the file. Supported file extensions are `.json`, `.yaml`,
-and `.yml`. For example, the following would read out `my-secret-key` from
-`my-secrets.json`:
+behaves similar to file secrets, but with the addition of a url fragment that is
+used to point to a specific value inside the file. Supported file extensions are
+`.json`, `.yaml`, and `.yml`. For example, the following would read out
+`my-secret-key` from `my-secrets.json`:
 
 ```yaml
-$secret:
-  data: ./my-secrets.json
-  path: deployment.key
+$data: ./my-secrets.json#deployment.key
+```
 
-# my-secrets.json
+Example `my-secrets.json` file:
+
+```json
 {
   "deployment": {
     "key": "my-secret-key"

@@ -14,26 +14,59 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-
-import { TechDocsPageWrapper } from './TechDocsPageWrapper';
+import { Content, Page, useApi } from '@backstage/core';
 import { Reader } from './Reader';
+import { useAsync } from 'react-use';
+import { TechDocsPageHeader } from './TechDocsPageHeader';
+import { techdocsApiRef } from '../../api';
 
 export const TechDocsPage = () => {
-  const { entityId } = useParams();
+  const [documentReady, setDocumentReady] = useState<boolean>(false);
+  const { namespace, kind, name } = useParams();
 
-  const [kind, namespace, name] = entityId.split(':');
+  const techdocsApi = useApi(techdocsApiRef);
+
+  const techdocsMetadataRequest = useAsync(() => {
+    if (documentReady) {
+      return techdocsApi.getTechDocsMetadata({ kind, namespace, name });
+    }
+
+    return Promise.resolve({ loading: true });
+  }, [kind, namespace, name, techdocsApi, documentReady]);
+
+  const entityMetadataRequest = useAsync(() => {
+    return techdocsApi.getEntityMetadata({ kind, namespace, name });
+  }, [kind, namespace, name, techdocsApi]);
+
+  const onReady = () => {
+    setDocumentReady(true);
+  };
 
   return (
-    <TechDocsPageWrapper title={name} subtitle={name}>
-      <Reader
+    <Page themeId="documentation">
+      <TechDocsPageHeader
+        metadataRequest={{
+          techdocs: techdocsMetadataRequest,
+          entity: entityMetadataRequest,
+        }}
         entityId={{
           kind,
           namespace,
           name,
         }}
       />
-    </TechDocsPageWrapper>
+      <Content data-testid="techdocs-content">
+        <Reader
+          onReady={onReady}
+          entityId={{
+            kind,
+            namespace,
+            name,
+          }}
+        />
+      </Content>
+    </Page>
   );
 };

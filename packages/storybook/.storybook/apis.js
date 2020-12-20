@@ -26,7 +26,7 @@ import {
 
 const builder = ApiRegistry.builder();
 
-builder.add(configApiRef, ConfigReader.fromConfigs([]));
+builder.add(configApiRef, new ConfigReader({}));
 
 const alertApi = builder.add(alertApiRef, new AlertApiForwarder());
 
@@ -36,7 +36,7 @@ builder.add(identityApiRef, {
   getUserId: () => 'guest',
   getProfile: () => ({ email: 'guest@example.com' }),
   getIdToken: () => undefined,
-  logout: async () => {},
+  signOut: async () => {},
 });
 
 const oauthRequestApi = builder.add(

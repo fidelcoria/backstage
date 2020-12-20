@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {
+  Content,
+  ContentHeader,
+  Header,
+  HeaderLabel,
+  Page,
+  SupportButton,
+  useApi,
+  WarningPanel,
+} from '@backstage/core';
 import {
   Button,
   ButtonGroup,
@@ -27,20 +36,9 @@ import {
   Theme,
   Typography,
 } from '@material-ui/core';
-import {
-  useApi,
-  googleAuthApiRef,
-  HeaderLabel,
-  Page,
-  Header,
-  pageTheme,
-  SupportButton,
-  Content,
-  ContentHeader,
-} from '@backstage/core';
 import React from 'react';
 import { useAsync } from 'react-use';
-import { GCPApiRef } from '../../api';
+import { gcpApiRef } from '../../api';
 
 const useStyles = makeStyles<Theme>(theme => ({
   root: {
@@ -56,33 +54,26 @@ const useStyles = makeStyles<Theme>(theme => ({
 }));
 
 const DetailsPage = () => {
-  const api = useApi(GCPApiRef);
-  const googleApi = useApi(googleAuthApiRef);
-  const token = googleApi.getAccessToken(
-    'https://www.googleapis.com/auth/cloud-platform.read-only',
-  );
-
+  const api = useApi(gcpApiRef);
   const classes = useStyles();
-  const status = useAsync(
-    () =>
+
+  const { loading, error, value: details } = useAsync(
+    async () =>
       api.getProject(
         decodeURIComponent(location.search.split('projectId=')[1]),
-        token,
       ),
     [location.search],
   );
 
-  if (status.loading) {
+  if (loading) {
     return <LinearProgress />;
-  } else if (status.error) {
+  } else if (error) {
     return (
-      <Typography variant="h6" color="error">
-        Failed to load build, {status.error.message}
-      </Typography>
+      <WarningPanel title="Failed to load project">
+        {error.toString()}
+      </WarningPanel>
     );
   }
-
-  const details = status.value;
 
   return (
     <Table component={Paper} className={classes.table}>
@@ -154,18 +145,16 @@ const labels = (
   </>
 );
 
-export const ProjectDetailsPage = () => {
-  return (
-    <Page theme={pageTheme.service}>
-      <Header title="GCP Project Details" type="other">
-        {labels}
-      </Header>
-      <Content>
-        <ContentHeader title="">
-          <SupportButton>Support Button</SupportButton>
-        </ContentHeader>
-        <DetailsPage />
-      </Content>
-    </Page>
-  );
-};
+export const ProjectDetailsPage = () => (
+  <Page themeId="service">
+    <Header title="GCP Project Details" type="other">
+      {labels}
+    </Header>
+    <Content>
+      <ContentHeader title="">
+        <SupportButton>Support Button</SupportButton>
+      </ContentHeader>
+      <DetailsPage />
+    </Content>
+  </Page>
+);

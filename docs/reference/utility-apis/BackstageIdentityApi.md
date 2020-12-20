@@ -1,7 +1,7 @@
 # BackstageIdentityApi
 
 The BackstageIdentityApi type is defined at
-[packages/core-api/src/apis/definitions/auth.ts:144](https://github.com/spotify/backstage/blob/82d329555c16af46db9b4e5cd2f44a3cc006a52e/packages/core-api/src/apis/definitions/auth.ts#L144).
+[packages/core-api/src/apis/definitions/auth.ts:134](https://github.com/backstage/backstage/blob/ca535f2f66c3a4980c80f4b1a049dfd07569010e/packages/core-api/src/apis/definitions/auth.ts#L134).
 
 The following Utility APIs implement this type:
 
@@ -15,7 +15,11 @@ The following Utility APIs implement this type:
 
 - [microsoftAuthApiRef](./README.md#microsoftauth)
 
+- [oauth2ApiRef](./README.md#oauth2)
+
 - [oktaAuthApiRef](./README.md#oktaauth)
+
+- [samlAuthApiRef](./README.md#samlauth)
 
 ## Members
 
@@ -66,7 +70,7 @@ export type AuthRequestOptions = {
 </pre>
 
 Defined at
-[packages/core-api/src/apis/definitions/auth.ts:40](https://github.com/spotify/backstage/blob/82d329555c16af46db9b4e5cd2f44a3cc006a52e/packages/core-api/src/apis/definitions/auth.ts#L40).
+[packages/core-api/src/apis/definitions/auth.ts:40](https://github.com/backstage/backstage/blob/ca535f2f66c3a4980c80f4b1a049dfd07569010e/packages/core-api/src/apis/definitions/auth.ts#L40).
 
 Referenced by: [getBackstageIdentity](#getbackstageidentity).
 
@@ -87,6 +91,6 @@ export type BackstageIdentity = {
 </pre>
 
 Defined at
-[packages/core-api/src/apis/definitions/auth.ts:157](https://github.com/spotify/backstage/blob/82d329555c16af46db9b4e5cd2f44a3cc006a52e/packages/core-api/src/apis/definitions/auth.ts#L157).
+[packages/core-api/src/apis/definitions/auth.ts:147](https://github.com/backstage/backstage/blob/ca535f2f66c3a4980c80f4b1a049dfd07569010e/packages/core-api/src/apis/definitions/auth.ts#L147).
 
 Referenced by: [getBackstageIdentity](#getbackstageidentity).

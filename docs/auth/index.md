@@ -1,11 +1,12 @@
 ---
 id: index
 title: User Authentication and Authorization in Backstage
+description: Documentation on User Authentication and Authorization in Backstage
 ---
 
 ## Summary
 
-The purpose of the Auth APIs in Backstage are to identify the user, and to
+The purpose of the Auth APIs in Backstage is to identify the user, and to
 provide a way for plugins to request access to 3rd party services on behalf of
 the user (OAuth). This documentation focuses on the implementation of that
 solution and how to extend it. For documentation on how to consume the Auth APIs
@@ -34,6 +35,13 @@ full list of providers, see the
 
 ### Identity - WIP
 
+> NOTE: Identity management and the `SignInPage` in Backstage is NOT a method
+> for blocking access for unauthorized users, that either requires additional
+> backend implementation or a separate service like Google's Identity-Aware
+> Proxy. The identity system only serves to provide a personalized experience
+> and access to a Backstage Identity Token, which can be passed to backend
+> plugins.
+
 Identity management is still work in progress, but there are already a couple of
 pieces in place that can be used.
 
@@ -50,7 +58,7 @@ token used to make authenticated calls within Backstage.
 The middleware that will be provided by `@backstage/backend-common` allows
 verification of Backstage ID tokens, and optionally loading additional
 information about the user. The progress is tracked in
-https://github.com/spotify/backstage/issues/1435.
+https://github.com/backstage/backstage/issues/1435.
 
 #### Identity for App Developers
 
@@ -85,6 +93,6 @@ sign-in methods.
 More details are provided in dedicated sections of the documentation.
 
 - [OAuth](./oauth.md): Description of the generic OAuth flow implemented by the
-  [auth-backend](../../plugins/auth-backend).
+  [auth-backend](https://github.com/backstage/backstage/tree/master/plugins/auth-backend).
 - [Glossary](./glossary.md): Glossary of some common terms related to the auth
   flows.

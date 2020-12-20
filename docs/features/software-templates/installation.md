@@ -1,6 +1,7 @@
 ---
 id: installation
 title: Installing in your Backstage App
+description: Documentation on How to install Backstage App
 ---
 
 The scaffolder plugin comes in two packages, `@backstage/plugin-scaffolder` and
@@ -86,41 +87,38 @@ import {
   createRouter,
   FilePreparer,
   GithubPreparer,
+  GitlabPreparer,
   Preparers,
+  Publishers,
   GithubPublisher,
+  GitlabPublisher,
   CreateReactAppTemplater,
   Templaters,
+  RepoVisibilityOptions,
 } from '@backstage/plugin-scaffolder-backend';
 import { Octokit } from '@octokit/rest';
+import { Gitlab } from '@gitbeaker/node';
 import type { PluginEnvironment } from '../types';
 import Docker from 'dockerode';
 
-export default async function createPlugin({ logger }: PluginEnvironment) {
+export default async function createPlugin({
+  logger,
+  config,
+}: PluginEnvironment) {
   const cookiecutterTemplater = new CookieCutter();
   const craTemplater = new CreateReactAppTemplater();
   const templaters = new Templaters();
-
-  // Register default templaters
   templaters.register('cookiecutter', cookiecutterTemplater);
   templaters.register('cra', craTemplater);
 
-  const filePreparer = new FilePreparer();
-  const githubPreparer = new GithubPreparer();
-  const preparers = new Preparers();
-
-  // Register default preparers
-  preparers.register('file', filePreparer);
-  preparers.register('github', githubPreparer);
-
-  // Create GitHub client with your access token from environment variables
-  const githubClient = new Octokit({ auth: process.env.GITHUB_ACCESS_TOKEN });
-  const publisher = new GithubPublisher({ client: githubClient });
+  const preparers = await Preparers.fromConfig(config, { logger });
+  const publishers = await Publishers.fromConfig(config, { logger });
 
   const dockerClient = new Docker();
   return await createRouter({
     preparers,
     templaters,
-    publisher,
+    publishers,
     logger,
     dockerClient,
   });
@@ -157,17 +155,17 @@ our example templates through static configuration. Add the following to the
 catalog:
   locations:
     # Backstage Example Templates
-    - type: github
-      target: https://github.com/spotify/backstage/blob/master/plugins/scaffolder-backend/sample-templates/react-ssr-template/template.yaml
-    - type: github
-      target: https://github.com/spotify/backstage/blob/master/plugins/scaffolder-backend/sample-templates/springboot-grpc-template/template.yaml
-    - type: github
-      target: https://github.com/spotify/backstage/blob/master/plugins/scaffolder-backend/sample-templates/create-react-app/template.yaml
-    - type: github
+    - type: url
+      target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/react-ssr-template/template.yaml
+    - type: url
+      target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/springboot-grpc-template/template.yaml
+    - type: url
+      target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/create-react-app/template.yaml
+    - type: url
       target: https://github.com/spotify/cookiecutter-golang/blob/master/template.yaml
 ```
 
-### Runtime Dependencies
+### Runtime Dependencies / Configuration
 
 For the scaffolder backend plugin to function, it needs a GitHub access token,
 and access to a running Docker daemon. You can create a GitHub access token
@@ -177,11 +175,56 @@ docs on creating private GitHub access tokens is available
 Note that the need for private GitHub access tokens will be replaced with GitHub
 Apps integration further down the line.
 
-> **Right now it is only possible to scaffold repositories inside GitHub
-> organizations, and not under personal accounts.**
+#### GitHub
 
-The GitHub access token is passed along using the `GITHUB_ACCESS_TOKEN`
-environment variable.
+The GitHub access token is retrieved from environment variables via the config.
+The config file needs to specify what environment variable the token is
+retrieved from. Your config should have the following objects.
+
+You can configure who can see the new repositories that the scaffolder creates
+by specifying `visibility` option. Valid options are `public`, `private` and
+`internal`. The `internal` option is for GitHub Enterprise clients, which means
+public within the enterprise.
+
+```yaml
+scaffolder:
+  github:
+    token:
+      $env: GITHUB_TOKEN
+    visibility: public # or 'internal' or 'private'
+```
+
+#### GitLab
+
+For GitLab, we currently support the configuration of the GitLab publisher and
+allows to configure the private access token and the base URL of a GitLab
+instance:
+
+```yaml
+scaffolder:
+  gitlab:
+    api:
+      baseUrl: https://gitlab.com
+      token:
+        $env: GITLAB_TOKEN
+```
+
+#### Azure DevOps
+
+For Azure DevOps we support both the preparer and publisher stage with the
+configuration of a private access token (PAT). For the publisher it's also
+required to define the base URL for the client to connect to the service. This
+will hopefully support on-prem installations as well but that has not been
+verified.
+
+```yaml
+scaffolder:
+  azure:
+    baseUrl: https://dev.azure.com/{your-organization}
+    api:
+      token:
+        $env: AZURE_TOKEN
+```
 
 ### Running the Backend
 
@@ -190,7 +233,7 @@ backend with the new configuration:
 
 ```bash
 cd packages/backend
-GITHUB_ACCESS_TOKEN=<token> yarn start
+GITHUB_TOKEN=<token> yarn start
 ```
 
 If you've also set up the frontend plugin, so you should be ready to go browse

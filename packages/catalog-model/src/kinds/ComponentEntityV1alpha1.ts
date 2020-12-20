@@ -16,10 +16,24 @@
 
 import * as yup from 'yup';
 import type { Entity } from '../entity/Entity';
-import type { EntityPolicy } from '../types';
+import { schemaValidator } from './util';
 
 const API_VERSION = ['backstage.io/v1alpha1', 'backstage.io/v1beta1'] as const;
 const KIND = 'Component' as const;
+
+const schema = yup.object<Partial<ComponentEntityV1alpha1>>({
+  apiVersion: yup.string().required().oneOf(API_VERSION),
+  kind: yup.string().required().equals([KIND]),
+  spec: yup
+    .object({
+      type: yup.string().required().min(1),
+      lifecycle: yup.string().required().min(1),
+      owner: yup.string().required().min(1),
+      providesApis: yup.array(yup.string().required()).notRequired(),
+      consumesApis: yup.array(yup.string().required()).notRequired(),
+    })
+    .required(),
+});
 
 export interface ComponentEntityV1alpha1 extends Entity {
   apiVersion: typeof API_VERSION[number];
@@ -28,29 +42,13 @@ export interface ComponentEntityV1alpha1 extends Entity {
     type: string;
     lifecycle: string;
     owner: string;
-    implementsApis?: string[];
+    providesApis?: string[];
+    consumesApis?: string[];
   };
 }
 
-export class ComponentEntityV1alpha1Policy implements EntityPolicy {
-  private schema: yup.Schema<any>;
-
-  constructor() {
-    this.schema = yup.object<Partial<ComponentEntityV1alpha1>>({
-      apiVersion: yup.string().required().oneOf(API_VERSION),
-      kind: yup.string().required().equals([KIND]),
-      spec: yup
-        .object({
-          type: yup.string().required().min(1),
-          lifecycle: yup.string().required().min(1),
-          owner: yup.string().required().min(1),
-          implementsApis: yup.array(yup.string()).notRequired(),
-        })
-        .required(),
-    });
-  }
-
-  async enforce(envelope: Entity): Promise<Entity> {
-    return await this.schema.validate(envelope, { strict: true });
-  }
-}
+export const componentEntityV1alpha1Validator = schemaValidator(
+  KIND,
+  API_VERSION,
+  schema,
+);

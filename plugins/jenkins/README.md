@@ -14,17 +14,7 @@ Website: [https://jenkins.io/](https://jenkins.io/)
 yarn add @backstage/plugin-jenkins
 ```
 
-2. Add plugin API to your Backstage instance:
-
-```js
-// packages/app/src/api.ts
-import { JenkinsApi, jenkinsApiRef } from '@backstage/plugin-jenkins';
-
-const builder = ApiRegistry.builder();
-builder.add(jenkinsApiRef, new JenkinsApi(`${backendUrl}/proxy/jenkins/api`));
-```
-
-2. Add plugin itself:
+2. Add plugin:
 
 ```js
 // packages/app/src/plugins.ts
@@ -40,13 +30,10 @@ proxy:
     changeOrigin: true
     headers:
       Authorization:
-        $secret:
-          env: JENKINS_BASIC_AUTH_HEADER
-    pathRewrite:
-      '^/proxy/jenkins/api/': '/'
+        $env: JENKINS_BASIC_AUTH_HEADER
 ```
 
-4. Add an environment variable which contains the Jenkins credentials, (note: use an API token not your password)
+4. Add an environment variable which contains the Jenkins credentials, (note: use an API token not your password). Here user is the name of the user created in Jenkins.
 
 ```shell
 HEADER=$(echo -n user:api-token | base64)
@@ -54,7 +41,7 @@ export JENKINS_BASIC_AUTH_HEADER="Basic $HEADER"
 ```
 
 5. Run app with `yarn start`
-6. Add the Jenkins folder annotation to your `component-info.yaml`, (note: currently this plugin only supports folders and Git SCM)
+6. Add the Jenkins folder annotation to your `catalog-info.yaml`, (note: currently this plugin only supports folders and Git SCM)
 
 ```yaml
 apiVersion: backstage.io/v1alpha1
@@ -63,7 +50,7 @@ metadata:
   name: 'your-component'
   description: 'a description'
   annotations:
-    backstage.io/jenkins-github-folder: 'folder-name/job-name'
+    jenkins.io/github-folder: 'folder-name/job-name'
 spec:
   type: service
   lifecycle: experimental
@@ -73,6 +60,21 @@ spec:
 7. Register your component
 
 8. Click the component in the catalog you should now see Jenkins builds, and a last build result for your master build.
+
+Note:
+
+If you are not using environment variable then you can directly type API token in app-config.yaml
+
+```yaml
+proxy:
+  '/jenkins/api':
+    target: 'http://localhost:8080' # your Jenkins URL
+    changeOrigin: true
+    headers:
+      Authorization: Basic YWRtaW46MTFlYzI1NmU0Mzg1MDFjM2Y1Yzc2Yjc1MWE3ZTQ3YWY4Mw==
+```
+
+YWRtaW46MTFlYzI1NmU0Mzg1MDFjM2Y1Yzc2Yjc1MWE3ZTQ3YWY4Mw== is the base64 of user and it's API token e.g. admin:11ec256e438501c3f5c76b751a7e47af83
 
 ## Features
 

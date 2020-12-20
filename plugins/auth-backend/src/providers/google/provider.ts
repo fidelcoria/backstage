@@ -15,36 +15,47 @@
  */
 
 import express from 'express';
+import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Logger } from 'winston';
+import { CatalogIdentityClient } from '../../lib/catalog';
 import {
+  encodeState,
+  OAuthAdapter,
+  OAuthEnvironmentHandler,
+  OAuthHandlers,
+  OAuthProviderOptions,
+  OAuthRefreshRequest,
+  OAuthResponse,
+  OAuthStartRequest,
+} from '../../lib/oauth';
+import {
+  executeFetchUserProfileStrategy,
   executeFrameHandlerStrategy,
   executeRedirectStrategy,
   executeRefreshTokenStrategy,
   makeProfileInfo,
-  executeFetchUserProfileStrategy,
   PassportDoneCallback,
 } from '../../lib/passport';
-import { RedirectInfo, AuthProviderFactory } from '../types';
-import {
-  OAuthAdapter,
-  OAuthHandlers,
-  OAuthProviderOptions,
-  OAuthResponse,
-  OAuthEnvironmentHandler,
-  OAuthStartRequest,
-  encodeState,
-  OAuthRefreshRequest,
-} from '../../lib/oauth';
-import passport from 'passport';
+import { AuthProviderFactory, RedirectInfo } from '../types';
 
 type PrivateInfo = {
   refreshToken: string;
 };
 
+export type GoogleAuthProviderOptions = OAuthProviderOptions & {
+  logger: Logger;
+  identityClient: CatalogIdentityClient;
+};
+
 export class GoogleAuthProvider implements OAuthHandlers {
   private readonly _strategy: GoogleStrategy;
+  private readonly logger: Logger;
+  private readonly identityClient: CatalogIdentityClient;
 
-  constructor(options: OAuthProviderOptions) {
+  constructor(options: GoogleAuthProviderOptions) {
+    this.logger = options.logger;
+    this.identityClient = options.identityClient;
     // TODO: throw error if env variables not set?
     this._strategy = new GoogleStrategy(
       {
@@ -138,20 +149,40 @@ export class GoogleAuthProvider implements OAuthHandlers {
       throw new Error('Google profile contained no email');
     }
 
-    // TODO(Rugvip): Hardcoded to the local part of the email for now
-    const id = profile.email.split('@')[0];
+    try {
+      const user = await this.identityClient.findUser({
+        annotations: {
+          'google.com/email': profile.email,
+        },
+      });
 
-    return { ...response, backstageIdentity: { id } };
+      return {
+        ...response,
+        backstageIdentity: {
+          id: user.metadata.name,
+        },
+      };
+    } catch (error) {
+      this.logger.warn(
+        `Failed to look up user, ${error}, falling back to allowing login based on email pattern, this will probably break in the future`,
+      );
+      return {
+        ...response,
+        backstageIdentity: { id: profile.email.split('@')[0] },
+      };
+    }
   }
 }
 
 export const createGoogleProvider: AuthProviderFactory = ({
+  providerId,
   globalConfig,
   config,
+  logger,
   tokenIssuer,
+  catalogApi,
 }) =>
   OAuthEnvironmentHandler.mapConfig(config, envConfig => {
-    const providerId = 'google';
     const clientId = envConfig.getString('clientId');
     const clientSecret = envConfig.getString('clientSecret');
     const callbackUrl = `${globalConfig.baseUrl}/${providerId}/handler/frame`;
@@ -160,6 +191,8 @@ export const createGoogleProvider: AuthProviderFactory = ({
       clientId,
       clientSecret,
       callbackUrl,
+      logger,
+      identityClient: new CatalogIdentityClient({ catalogApi }),
     });
 
     return OAuthAdapter.fromConfig(globalConfig, provider, {

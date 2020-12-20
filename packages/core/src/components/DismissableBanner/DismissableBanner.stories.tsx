@@ -28,7 +28,7 @@ import {
 } from '@backstage/core-api';
 
 export default {
-  title: 'DismissableBanner',
+  title: 'Feedback/DismissableBanner',
   component: DismissableBanner,
 };
 
@@ -96,6 +96,18 @@ export const WithLink = () => (
         }
         variant="info"
         id="linked_dismissable"
+      />
+    </ApiProvider>
+  </div>
+);
+export const Fixed = () => (
+  <div style={containerStyle}>
+    <ApiProvider apis={apis}>
+      <DismissableBanner
+        message="This is a dismissable banner with a fixed position fixed at the bottom of the page"
+        variant="info"
+        id="fixed_dismissable"
+        fixed
       />
     </ApiProvider>
   </div>

@@ -15,6 +15,12 @@
  */
 import type { TemplateEntityV1alpha1 } from '@backstage/catalog-model';
 import { Logger } from 'winston';
+import { RemoteProtocol } from '../types';
+
+export type PreparerOptions = {
+  logger: Logger;
+  workingDirectory?: string;
+};
 
 export type PreparerBase = {
   /**
@@ -24,7 +30,7 @@ export type PreparerBase = {
    */
   prepare(
     template: TemplateEntityV1alpha1,
-    opts: { logger: Logger },
+    opts: PreparerOptions,
   ): Promise<string>;
 };
 
@@ -32,5 +38,3 @@ export type PreparerBuilder = {
   register(protocol: RemoteProtocol, preparer: PreparerBase): void;
   get(template: TemplateEntityV1alpha1): PreparerBase;
 };
-
-export type RemoteProtocol = 'file' | 'github';

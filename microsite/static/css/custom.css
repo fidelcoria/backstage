@@ -15,9 +15,6 @@ table tr:nth-child(2n) {
   background-color: #2b2b2b;
 }
 
-@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
-}
-
 @media only screen and (min-width: 1024px) and (max-width: 1500px) {
   /* Experience */
   .content-experience {
@@ -49,6 +46,14 @@ h5,
 h6 {
   font-family: Helvetica Neue, sans-serif;
   color: $textColor;
+}
+
+h2:hover .hash-link {
+  opacity: 1;
+}
+
+.hash-link {
+  fill: white;
 }
 
 /* body elements  */
@@ -844,6 +849,7 @@ code {
   width: 700px;
   margin: 20px auto;
   max-width: calc(100vw - 80px);
+  padding-bottom: 80px;
 }
 
 @media only screen and (max-width: 485px) {
@@ -856,7 +862,6 @@ code {
   position: relative;
   padding-top: 75%;
   width: 100%;
-  /* border: 1px dotted #f00; */
 }
 
 .Block__Graphic {
@@ -1069,4 +1074,36 @@ code {
   img {
     margin: auto;
   }
+}
+
+.cncf-block {
+  padding-top: 40px;
+  text-align: center;
+}
+
+.cncf-logo {
+  background: center no-repeat url(../img/cncf-white.svg);
+  width: 100%;
+  height: 100px;
+  margin-bottom: 40px;
+  margin-top: 20px;
+}
+
+.nav-footer .copyright {
+  width: 600px;
+  color: #fff;
+  margin: 0 auto;
+  font-size: 10pt;
+}
+
+@media only screen and (max-width: 485px) {
+  .nav-footer .copyright {
+    width: auto;
+    margin: 0 1.5em;
+  }
+}
+
+/* Zoomed images using the medium-zoom library should be on top of screen. */
+.medium-zoom-image {
+  z-index: 10000;
 }

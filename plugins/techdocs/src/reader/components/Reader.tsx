@@ -13,33 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import React from 'react';
-import { useApi, Progress } from '@backstage/core';
-import { useShadowDom } from '..';
 import { useAsync } from 'react-use';
-import { techdocsStorageApiRef } from '../../api';
+import { useTheme } from '@material-ui/core';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ParsedEntityId } from '../../types';
+import { EntityName } from '@backstage/catalog-model';
+import { useApi } from '@backstage/core';
+import { BackstageTheme } from '@backstage/theme';
+import { useShadowDom } from '..';
+import { techdocsStorageApiRef } from '../../api';
+import TechDocsProgressBar from './TechDocsProgressBar';
 
 import transformer, {
   addBaseUrl,
   rewriteDocLinks,
   addLinkClickListener,
   removeMkdocsHeader,
-  modifyCss,
+  simplifyMkdocsFooter,
   onCssReady,
   sanitizeDOM,
+  injectCss,
 } from '../transformers';
 import { TechDocsNotFound } from './TechDocsNotFound';
 
 type Props = {
-  entityId: ParsedEntityId;
+  entityId: EntityName;
+  onReady?: () => void;
 };
 
-export const Reader = ({ entityId }: Props) => {
+export const Reader = ({ entityId, onReady }: Props) => {
   const { kind, namespace, name } = entityId;
   const { '*': path } = useParams();
+  const theme = useTheme<BackstageTheme>();
 
   const techdocsStorageApi = useApi(techdocsStorageApiRef);
   const [shadowDomRef, shadowRoot] = useShadowDom();
@@ -53,7 +58,9 @@ export const Reader = ({ entityId }: Props) => {
     if (!shadowRoot || loading || error) {
       return; // Shadow DOM isn't ready / It's not ready / Docs was not found
     }
-
+    if (onReady) {
+      onReady();
+    }
     // Pre-render
     const transformedElement = transformer(value as string, [
       sanitizeDOM(),
@@ -63,16 +70,25 @@ export const Reader = ({ entityId }: Props) => {
         path,
       }),
       rewriteDocLinks(),
-      modifyCss({
-        cssTransforms: {
-          '.md-main__inner': [{ 'margin-top': '0' }],
-          '.md-sidebar': [{ top: '0' }, { width: '20rem' }],
-          '.md-typeset': [{ 'font-size': '1rem' }],
-          '.md-nav': [{ 'font-size': '1rem' }],
-          '.md-grid': [{ 'max-width': '80vw' }],
-        },
-      }),
       removeMkdocsHeader(),
+      simplifyMkdocsFooter(),
+      injectCss({
+        css: `
+        body {
+          font-family: ${theme.typography.fontFamily};
+          --md-text-color: ${theme.palette.text.primary};
+          --md-text-link-color: ${theme.palette.primary.main};
+
+          --md-code-fg-color: ${theme.palette.text.primary};
+          --md-code-bg-color: ${theme.palette.background.paper};
+        }
+        .md-main__inner { margin-top: 0; }
+        .md-sidebar { top: 0; width: 20rem; }
+        .md-typeset { font-size: 1rem; }
+        .md-nav { font-size: 1rem; }
+        .md-grid { max-width: 80vw; }
+        `,
+      }),
     ]);
 
     if (!transformedElement) {
@@ -96,6 +112,7 @@ export const Reader = ({ entityId }: Props) => {
         return dom;
       },
       addLinkClickListener({
+        baseUrl: window.location.origin,
         onClick: (_: MouseEvent, url: string) => {
           const parsedUrl = new URL(url);
           navigate(`${parsedUrl.pathname}${parsedUrl.hash}`);
@@ -125,15 +142,17 @@ export const Reader = ({ entityId }: Props) => {
     entityId,
     navigate,
     techdocsStorageApi,
+    theme,
+    onReady,
   ]);
 
   if (error) {
-    return <TechDocsNotFound />;
+    return <TechDocsNotFound errorMessage={error.message} />;
   }
 
   return (
     <>
-      {loading ? <Progress /> : null}
+      {loading ? <TechDocsProgressBar /> : null}
       <div ref={shadowDomRef} />
     </>
   );

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import { EntityPolicy } from '../types';
 import {
   ApiEntityV1alpha1,
-  ApiEntityV1alpha1Policy,
+  apiEntityV1alpha1Validator as validator,
 } from './ApiEntityV1alpha1';
 
-describe('ApiV1alpha1Policy', () => {
+describe('ApiV1alpha1Validator', () => {
   let entity: ApiEntityV1alpha1;
-  let policy: EntityPolicy;
 
   beforeEach(() => {
     entity = {
@@ -33,6 +31,8 @@ describe('ApiV1alpha1Policy', () => {
       },
       spec: {
         type: 'openapi',
+        lifecycle: 'production',
+        owner: 'me',
         definition: `
 openapi: "3.0.0"
 info:
@@ -47,7 +47,7 @@ paths:
         '200':
           description: A paged array of pets
           content:
-            application/json:    
+            application/json:
               schema:
                 $ref: "#/components/schemas/Pets"
 components:
@@ -72,55 +72,84 @@ components:
 `,
       },
     };
-    policy = new ApiEntityV1alpha1Policy();
   });
 
   it('happy path: accepts valid data', async () => {
-    await expect(policy.enforce(entity)).resolves.toBe(entity);
+    await expect(validator.check(entity)).resolves.toBe(true);
   });
 
   it('silently accepts v1beta1 as well', async () => {
     (entity as any).apiVersion = 'backstage.io/v1beta1';
-    await expect(policy.enforce(entity)).resolves.toBe(entity);
+    await expect(validator.check(entity)).resolves.toBe(true);
   });
 
-  it('rejects unknown apiVersion', async () => {
+  it('ignores unknown apiVersion', async () => {
     (entity as any).apiVersion = 'backstage.io/v1beta0';
-    await expect(policy.enforce(entity)).rejects.toThrow(/apiVersion/);
+    await expect(validator.check(entity)).resolves.toBe(false);
   });
 
-  it('rejects unknown kind', async () => {
+  it('ignores unknown kind', async () => {
     (entity as any).kind = 'Wizard';
-    await expect(policy.enforce(entity)).rejects.toThrow(/kind/);
+    await expect(validator.check(entity)).resolves.toBe(false);
   });
 
   it('rejects missing type', async () => {
     delete (entity as any).spec.type;
-    await expect(policy.enforce(entity)).rejects.toThrow(/type/);
+    await expect(validator.check(entity)).rejects.toThrow(/type/);
   });
 
   it('rejects wrong type', async () => {
     (entity as any).spec.type = 7;
-    await expect(policy.enforce(entity)).rejects.toThrow(/type/);
+    await expect(validator.check(entity)).rejects.toThrow(/type/);
   });
 
   it('rejects empty type', async () => {
     (entity as any).spec.type = '';
-    await expect(policy.enforce(entity)).rejects.toThrow(/type/);
+    await expect(validator.check(entity)).rejects.toThrow(/type/);
+  });
+
+  it('rejects missing lifecycle', async () => {
+    delete (entity as any).spec.lifecycle;
+    await expect(validator.check(entity)).rejects.toThrow(/lifecycle/);
+  });
+
+  it('rejects wrong lifecycle', async () => {
+    (entity as any).spec.lifecycle = 7;
+    await expect(validator.check(entity)).rejects.toThrow(/lifecycle/);
+  });
+
+  it('rejects empty lifecycle', async () => {
+    (entity as any).spec.lifecycle = '';
+    await expect(validator.check(entity)).rejects.toThrow(/lifecycle/);
+  });
+
+  it('rejects missing owner', async () => {
+    delete (entity as any).spec.owner;
+    await expect(validator.check(entity)).rejects.toThrow(/owner/);
+  });
+
+  it('rejects wrong owner', async () => {
+    (entity as any).spec.owner = 7;
+    await expect(validator.check(entity)).rejects.toThrow(/owner/);
+  });
+
+  it('rejects empty owner', async () => {
+    (entity as any).spec.owner = '';
+    await expect(validator.check(entity)).rejects.toThrow(/owner/);
   });
 
   it('rejects missing definition', async () => {
     delete (entity as any).spec.definition;
-    await expect(policy.enforce(entity)).rejects.toThrow(/definition/);
+    await expect(validator.check(entity)).rejects.toThrow(/definition/);
   });
 
   it('rejects wrong definition', async () => {
     (entity as any).spec.definition = 7;
-    await expect(policy.enforce(entity)).rejects.toThrow(/definition/);
+    await expect(validator.check(entity)).rejects.toThrow(/definition/);
   });
 
   it('rejects empty definition', async () => {
     (entity as any).spec.definition = '';
-    await expect(policy.enforce(entity)).rejects.toThrow(/definition/);
+    await expect(validator.check(entity)).rejects.toThrow(/definition/);
   });
 });

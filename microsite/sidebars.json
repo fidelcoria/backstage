@@ -3,11 +3,11 @@
     "Overview": [
       "overview/what-is-backstage",
       "overview/architecture-overview",
-      "overview/architecture-terminology",
       "overview/roadmap",
       "overview/vision",
       "overview/background",
       "overview/adopting",
+      "overview/stability-index",
       "overview/logos"
     ],
     "Getting Started": [
@@ -29,10 +29,12 @@
         "label": "Deployment",
         "ids": [
           "getting-started/deployment-k8s",
+          "getting-started/deployment-helm",
           "getting-started/deployment-other"
         ]
       }
     ],
+    "CLI": ["cli/index", "cli/commands"],
     "Core Features": [
       {
         "type": "subcategory",
@@ -40,9 +42,12 @@
         "ids": [
           "features/software-catalog/software-catalog-overview",
           "features/software-catalog/installation",
+          "features/software-catalog/configuration",
           "features/software-catalog/system-model",
           "features/software-catalog/descriptor-format",
+          "features/software-catalog/references",
           "features/software-catalog/well-known-annotations",
+          "features/software-catalog/well-known-relations",
           "features/software-catalog/extending-the-model",
           "features/software-catalog/external-integrations",
           "features/software-catalog/software-catalog-api"
@@ -70,6 +75,9 @@
           "features/techdocs/concepts",
           "features/techdocs/architecture",
           "features/techdocs/creating-and-publishing",
+          "features/techdocs/configuration",
+          "features/techdocs/using-cloud-storage",
+          "features/techdocs/troubleshooting",
           "features/techdocs/faqs"
         ]
       }
@@ -143,7 +151,11 @@
         "ids": ["api/backend"]
       }
     ],
-    "Tutorials": ["tutorials/journey"],
+    "Tutorials": [
+      "tutorials/journey",
+      "tutorials/quickstart-app-auth",
+      "tutorials/quickstart-app-plugin"
+    ],
     "Architecture Decision Records (ADRs)": [
       "architecture-decisions/adrs-overview",
       "architecture-decisions/adrs-adr001",
@@ -153,10 +165,11 @@
       "architecture-decisions/adrs-adr005",
       "architecture-decisions/adrs-adr006",
       "architecture-decisions/adrs-adr007",
-      "architecture-decisions/adrs-adr008"
+      "architecture-decisions/adrs-adr008",
+      "architecture-decisions/adrs-adr009"
     ],
     "Contribute": ["../CONTRIBUTING"],
-    "Support": ["overview/support"],
+    "Support": ["support/support", "support/project-structure"],
     "FAQ": ["FAQ"]
   }
 }

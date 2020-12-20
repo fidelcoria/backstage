@@ -24,8 +24,7 @@ describe('loadConfig', () => {
         app:
           title: Example App
           sessionKey:
-            $secret:
-              file: secrets/session-key.txt
+            $file: secrets/session-key.txt
       `,
       '/root/app-config.development.yaml': `
         app:
@@ -39,31 +38,12 @@ describe('loadConfig', () => {
     mockFs.restore();
   });
 
-  it('loads config without secrets', async () => {
+  it('load config from default path', async () => {
     await expect(
       loadConfig({
-        rootPaths: ['/root'],
+        configRoot: '/root',
+        configPaths: [],
         env: 'production',
-        shouldReadSecrets: false,
-      }),
-    ).resolves.toEqual([
-      {
-        context: 'app-config.yaml',
-        data: {
-          app: {
-            title: 'Example App',
-          },
-        },
-      },
-    ]);
-  });
-
-  it('loads config with secrets', async () => {
-    await expect(
-      loadConfig({
-        rootPaths: ['/root'],
-        env: 'production',
-        shouldReadSecrets: true,
       }),
     ).resolves.toEqual([
       {
@@ -78,12 +58,12 @@ describe('loadConfig', () => {
     ]);
   });
 
-  it('loads development config without secrets', async () => {
+  it('loads config with secrets', async () => {
     await expect(
       loadConfig({
-        rootPaths: ['/root'],
-        env: 'development',
-        shouldReadSecrets: false,
+        configRoot: '/root',
+        configPaths: ['/root/app-config.yaml'],
+        env: 'production',
       }),
     ).resolves.toEqual([
       {
@@ -91,13 +71,8 @@ describe('loadConfig', () => {
         data: {
           app: {
             title: 'Example App',
+            sessionKey: 'abc123',
           },
-        },
-      },
-      {
-        context: 'app-config.development.yaml',
-        data: {
-          app: {},
         },
       },
     ]);
@@ -106,9 +81,12 @@ describe('loadConfig', () => {
   it('loads development config with secrets', async () => {
     await expect(
       loadConfig({
-        rootPaths: ['/root'],
+        configRoot: '/root',
+        configPaths: [
+          '/root/app-config.yaml',
+          '/root/app-config.development.yaml',
+        ],
         env: 'development',
-        shouldReadSecrets: true,
       }),
     ).resolves.toEqual([
       {

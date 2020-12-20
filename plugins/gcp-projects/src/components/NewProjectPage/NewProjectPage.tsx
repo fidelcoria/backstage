@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import React, { FC, useState } from 'react';
-import { Grid, Button, TextField } from '@material-ui/core';
-
 import {
-  InfoCard,
   Content,
   ContentHeader,
+  Header,
+  HeaderLabel,
+  InfoCard,
+  Page,
   SimpleStepper,
   SimpleStepperStep,
   StructuredMetadataTable,
-  HeaderLabel,
-  Page,
-  Header,
-  pageTheme,
   SupportButton,
 } from '@backstage/core';
+import { Button, Grid, TextField } from '@material-ui/core';
+import React, { useState } from 'react';
 
-export const Project: FC<{}> = () => {
+export const Project = () => {
   const [projectName, setProjectName] = useState('');
   const [projectId, setProjectId] = useState('');
   const [disabled, setDisabled] = useState(true);
@@ -112,20 +110,18 @@ const labels = (
   </>
 );
 
-export const NewProjectPage = () => {
-  return (
-    <Page theme={pageTheme.service}>
-      <Header title="New GCP Project" type="tool">
-        {labels}
-      </Header>
-      <Content>
-        <ContentHeader title="">
-          <SupportButton>
-            This plugin allows you to view and interact with your gcp projects.
-          </SupportButton>
-        </ContentHeader>
-        <Project />
-      </Content>
-    </Page>
-  );
-};
+export const NewProjectPage = () => (
+  <Page themeId="service">
+    <Header title="New GCP Project" type="tool">
+      {labels}
+    </Header>
+    <Content>
+      <ContentHeader title="">
+        <SupportButton>
+          This plugin allows you to view and interact with your gcp projects.
+        </SupportButton>
+      </ContentHeader>
+      <Project />
+    </Content>
+  </Page>
+);

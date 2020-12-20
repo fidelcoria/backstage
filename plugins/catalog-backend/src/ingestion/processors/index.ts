@@ -16,5 +16,18 @@
 
 import * as results from './results';
 
-export { results };
+export { AnnotateLocationEntityProcessor } from './AnnotateLocationEntityProcessor';
+export { BuiltinKindsEntityProcessor } from './BuiltinKindsEntityProcessor';
+export { CodeOwnersProcessor } from './CodeOwnersProcessor';
+export { FileReaderProcessor } from './FileReaderProcessor';
+export { GithubOrgReaderProcessor } from './GithubOrgReaderProcessor';
+export { LdapOrgReaderProcessor } from './LdapOrgReaderProcessor';
+export { LocationRefProcessor } from './LocationEntityProcessor';
+export { MicrosoftGraphOrgReaderProcessor } from './MicrosoftGraphOrgReaderProcessor';
+export { PlaceholderProcessor } from './PlaceholderProcessor';
+export type { PlaceholderResolver } from './PlaceholderProcessor';
+export { StaticLocationProcessor } from './StaticLocationProcessor';
 export * from './types';
+export { UrlReaderProcessor } from './UrlReaderProcessor';
+export { parseEntityYaml } from './util/parse';
+export { results };

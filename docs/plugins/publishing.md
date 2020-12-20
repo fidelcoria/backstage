@@ -1,15 +1,16 @@
 ---
 id: publishing
 title: Publishing
+description: Documentation on Publishing npm packages
 ---
 
-## NPM
+## npm
 
-NPM packages are published through CI/CD in the
-[.github/workflows/master.yml](https://github.com/spotify/backstage/blob/master/.github/workflows/master.yml)
+npm packages are published through CI/CD in the
+[.github/workflows/master.yml](https://github.com/backstage/backstage/blob/master/.github/workflows/master.yml)
 workflow. Every commit that is merged to master will be checked for new versions
 of all public packages, and any new versions will automatically be published to
-NPM.
+npm.
 
 ### Creating a new release
 
@@ -19,6 +20,9 @@ out a new branch that you will use for the release, e.g.
 ```sh
 $ git checkout -b new-release
 ```
+
+First bump the `CHANGELOG.md` in the root of the repo and commit. You bump it by
+adding a header for the new version just below the `## Next Release` one.
 
 Then, from the root of the repo, run
 
@@ -52,5 +56,3 @@ $ git reset --hard master
 $ yarn release
 $ git push --force
 ```
-
-[Back to Docs](../README.md)

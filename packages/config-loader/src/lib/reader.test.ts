@@ -28,7 +28,6 @@ function memoryFiles(files: { [path: string]: string }) {
 
 const mockContext: ReaderContext = {
   env: {},
-  skip: () => false,
   readFile: jest.fn(),
   readSecret: jest.fn(),
 };
@@ -85,6 +84,47 @@ describe('readConfigFile', () => {
 
   it('should read secrets', async () => {
     const readFile = memoryFiles({
+      './app-config.yaml': 'app: { $file: "./my-secret" }',
+    });
+    const readSecret = jest.fn().mockResolvedValue('secret');
+
+    const config = readConfigFile('./app-config.yaml', {
+      ...mockContext,
+      readFile,
+      readSecret: readSecret as ReadSecretFunc,
+    });
+
+    await expect(config).resolves.toEqual({
+      data: {
+        app: 'secret',
+      },
+      context: 'app-config.yaml',
+    });
+    expect(readSecret).toHaveBeenCalledWith('.app', {
+      file: './my-secret',
+    });
+  });
+
+  it('should not allow keys adjacent to secrets', async () => {
+    const readFile = memoryFiles({
+      './app-config.yaml': 'app: { extraKey: 3, $file: "./my-secret" }',
+    });
+    const readSecret = jest.fn().mockResolvedValue('secret');
+
+    const config = readConfigFile('./app-config.yaml', {
+      ...mockContext,
+      readFile,
+      readSecret: readSecret as ReadSecretFunc,
+    });
+
+    await expect(config).rejects.toThrow(
+      "Secret key '$file' has adjacent keys at .app",
+    );
+    expect(readSecret).not.toHaveBeenCalled();
+  });
+
+  it('should read deprecated secrets', async () => {
+    const readFile = memoryFiles({
       './app-config.yaml': 'app: { $secret: { file: "./my-secret" } }',
     });
     const readSecret = jest.fn().mockResolvedValue('secret');
@@ -106,7 +146,7 @@ describe('readConfigFile', () => {
     });
   });
 
-  it('should require secrets to be objects', async () => {
+  it('should require deprecated secrets to be objects', async () => {
     const readFile = memoryFiles({
       './app-config.yaml': 'app: { $secret: ["wrong-type"] }',
     });
@@ -137,23 +177,5 @@ describe('readConfigFile', () => {
     });
 
     await expect(config).rejects.toThrow('Invalid secret at .app: NOPE');
-  });
-
-  it('should omit skipped values', async () => {
-    const readFile = memoryFiles({
-      './app-config.yaml': 'app: { title: skip, name: include }',
-    });
-
-    const config = readConfigFile('./app-config.yaml', {
-      ...mockContext,
-      readFile,
-      skip: (path: string) => path === '.app.title',
-      readSecret: jest.fn() as ReadSecretFunc,
-    });
-
-    await expect(config).resolves.toEqual({
-      context: 'app-config.yaml',
-      data: { app: { name: 'include' } },
-    });
   });
 });

@@ -25,11 +25,13 @@ import {
   yesPromptFunc,
 } from '../../lib/diff';
 import { paths } from '../../lib/paths';
-import { version as backstageVersion } from '../../lib/version';
 
 export type PluginData = {
   id: string;
   name: string;
+  privatePackage: string;
+  pluginVersion: string;
+  npmRegistry: string;
 };
 
 const fileHandlers = [
@@ -38,16 +40,12 @@ const fileHandlers = [
     handler: handlers.packageJson,
   },
   {
-    patterns: ['tsconfig.json'],
-    handler: handlers.exactMatch,
-  },
-  {
     // make sure files in 1st level of src/ and dev/ exist
     patterns: ['.eslintrc.js', /^(src|dev)\/[^/]+$/],
     handler: handlers.exists,
   },
   {
-    patterns: ['README.md', /^src\//],
+    patterns: ['README.md', 'tsconfig.json', /^src\//],
     handler: handlers.skip,
   },
 ];
@@ -62,14 +60,8 @@ export default async (cmd: Command) => {
     promptFunc = yesPromptFunc;
   }
 
-  const { version } = await fs.readJson(paths.resolveTargetRoot('lerna.json'));
-
   const data = await readPluginData();
-  const templateFiles = await diffTemplateFiles('default-plugin', {
-    version,
-    backstageVersion,
-    ...data,
-  });
+  const templateFiles = await diffTemplateFiles('default-plugin', data);
   await handleAllFiles(fileHandlers, templateFiles, promptFunc);
   await finalize();
 };
@@ -77,9 +69,19 @@ export default async (cmd: Command) => {
 // Reads templating data from the existing plugin
 async function readPluginData(): Promise<PluginData> {
   let name: string;
+  let privatePackage: string;
+  let pluginVersion: string;
+  let npmRegistry: string;
   try {
     const pkg = require(paths.resolveTarget('package.json'));
     name = pkg.name;
+    privatePackage = pkg.private;
+    pluginVersion = pkg.version;
+    const scope = name.split('/')[0];
+    if (`${scope}:registry` in pkg.publishConfig) {
+      const registryURL = pkg.publishConfig[`${scope}:registry`];
+      npmRegistry = `"${scope}:registry" : "${registryURL}"`;
+    } else npmRegistry = '';
   } catch (error) {
     throw new Error(`Failed to read target package, ${error}`);
   }
@@ -96,5 +98,5 @@ async function readPluginData(): Promise<PluginData> {
 
   const id = pluginIdMatch[1];
 
-  return { id, name };
+  return { id, name, privatePackage, pluginVersion, npmRegistry };
 }

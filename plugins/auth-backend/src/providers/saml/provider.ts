@@ -41,8 +41,10 @@ type SamlInfo = {
 export class SamlAuthProvider implements AuthProviderRouteHandlers {
   private readonly strategy: SamlStrategy;
   private readonly tokenIssuer: TokenIssuer;
+  private readonly appUrl: string;
 
   constructor(options: SAMLProviderOptions) {
+    this.appUrl = options.appUrl;
     this.tokenIssuer = options.tokenIssuer;
     this.strategy = new SamlStrategy({ ...options }, ((
       profile: SamlProfile,
@@ -54,7 +56,7 @@ export class SamlAuthProvider implements AuthProviderRouteHandlers {
       // TODO: This flow doesn't issue an identity token that can be used to validate
       //       the identity of the user in other backends, which we need in some form.
       done(undefined, {
-        userId: profile.ID!,
+        userId: profile.nameID!,
         profile: {
           email: profile.email!,
           displayName: profile.displayName as string,
@@ -82,7 +84,7 @@ export class SamlAuthProvider implements AuthProviderRouteHandlers {
         claims: { sub: id },
       });
 
-      return postMessageResponse(res, 'http://localhost:3000', {
+      return postMessageResponse(res, this.appUrl, {
         type: 'authorization_response',
         response: {
           providerInfo: {},
@@ -91,7 +93,7 @@ export class SamlAuthProvider implements AuthProviderRouteHandlers {
         },
       });
     } catch (error) {
-      return postMessageResponse(res, 'http://localhost:3000', {
+      return postMessageResponse(res, this.appUrl, {
         type: 'authorization_response',
         error: {
           name: error.name,
@@ -115,19 +117,24 @@ type SAMLProviderOptions = {
   issuer: string;
   path: string;
   tokenIssuer: TokenIssuer;
+  appUrl: string;
 };
 
 export const createSamlProvider: AuthProviderFactory = ({
+  providerId,
+  globalConfig,
   config,
   tokenIssuer,
 }) => {
+  const url = new URL(globalConfig.baseUrl);
   const entryPoint = config.getString('entryPoint');
   const issuer = config.getString('issuer');
   const opts = {
     entryPoint,
     issuer,
-    path: '/auth/saml/handler/frame',
+    path: `${url.pathname}/${providerId}/handler/frame`,
     tokenIssuer,
+    appUrl: globalConfig.appUrl,
   };
 
   return new SamlAuthProvider(opts);

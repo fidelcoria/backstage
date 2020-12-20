@@ -1,13 +1,14 @@
 ---
 id: system-model
 title: System Model
+description: Documentation on System Model
 ---
 
 We believe that a strong shared understanding and terminology around software
 and resources leads to a better Backstage experience.
 
 _This description originates from
-[this RFC](https://github.com/spotify/backstage/issues/390). Note that some of
+[this RFC](https://github.com/backstage/backstage/issues/390). Note that some of
 the concepts are not yet supported in Backstage._
 
 ## Core Entities
@@ -112,5 +113,5 @@ Backstage currently supports Components and APIs.
 
 ## Links
 
-- [Original RFC](https://github.com/spotify/backstage/issues/390)
+- [Original RFC](https://github.com/backstage/backstage/issues/390)
 - [YAML file format](../../architecture-decisions/adr002-default-catalog-file-format.md)

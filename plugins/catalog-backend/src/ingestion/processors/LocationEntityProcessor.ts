@@ -16,28 +16,53 @@
 
 import { Entity, LocationEntity, LocationSpec } from '@backstage/catalog-model';
 import * as result from './results';
-import { LocationProcessor, LocationProcessorEmit } from './types';
+import { CatalogProcessor, CatalogProcessorEmit } from './types';
+import path from 'path';
 
-export class LocationRefProcessor implements LocationProcessor {
-  async processEntity(
+export function toAbsoluteUrl(base: LocationSpec, target: string): string {
+  try {
+    if (base.type === 'file') {
+      if (target.startsWith('.')) {
+        return path.join(path.dirname(base.target), target);
+      }
+      return target;
+    }
+    return new URL(target, base.target).toString();
+  } catch (e) {
+    return target;
+  }
+}
+
+export class LocationRefProcessor implements CatalogProcessor {
+  async postProcessEntity(
     entity: Entity,
-    _location: LocationSpec,
-    emit: LocationProcessorEmit,
+    location: LocationSpec,
+    emit: CatalogProcessorEmit,
   ): Promise<Entity> {
     if (entity.kind === 'Location') {
-      const location = entity as LocationEntity;
-      if (location.spec.target) {
+      const locationEntity = entity as LocationEntity;
+
+      const type = locationEntity.spec.type || location.type;
+      if (type === 'file' && location.target.endsWith(path.sep)) {
         emit(
-          result.location(
-            { type: location.spec.type, target: location.spec.target },
-            false,
+          result.inputError(
+            location,
+            `LocationRefProcessor cannot handle ${type} type location with target ${location.target} that ends with a path separator`,
           ),
         );
       }
-      if (location.spec.targets) {
-        for (const target of location.spec.targets) {
-          emit(result.location({ type: location.spec.type, target }, false));
-        }
+
+      const targets = new Array<string>();
+      if (locationEntity.spec.target) {
+        targets.push(locationEntity.spec.target);
+      }
+      if (locationEntity.spec.targets) {
+        targets.push(...locationEntity.spec.targets);
+      }
+
+      for (const maybeRelativeTarget of targets) {
+        const target = toAbsoluteUrl(location, maybeRelativeTarget);
+        emit(result.location({ type, target }, false));
       }
     }
 

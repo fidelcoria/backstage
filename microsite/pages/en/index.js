@@ -31,7 +31,7 @@ class Index extends React.Component {
                 high-quality code quickly — without compromising autonomy.
               </Block.Paragraph>
               <Block.LinkButton
-                href={'https://github.com/spotify/backstage#getting-started'}
+                href={'https://github.com/backstage/backstage#getting-started'}
               >
                 GitHub
               </Block.LinkButton>
@@ -282,7 +282,7 @@ class Index extends React.Component {
             Build your own software templates
           </ActionBlock.Title>
           <ActionBlock.Link
-            href={`https://github.com/spotify/backstage/blob/master/docs/features/software-templates/extending/index.md`}
+            href={`https://github.com/backstage/backstage/blob/master/docs/features/software-templates/extending/index.md`}
           >
             Contribute
           </ActionBlock.Link>
@@ -462,6 +462,19 @@ class Index extends React.Component {
             Contribute
           </ActionBlock.Link>
         </ActionBlock>
+
+        <Block small className="bg-black-grey cncf-block">
+          <Block.Container center>
+            <Block.SmallTitle small>
+              Backstage is a{' '}
+              <a href="https://www.cncf.io">
+                Cloud Native Computing Foundation
+              </a>{' '}
+              sandbox project
+              <div className="cncf-logo" />
+            </Block.SmallTitle>
+          </Block.Container>
+        </Block>
       </main>
     );
   }

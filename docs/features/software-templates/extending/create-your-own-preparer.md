@@ -1,6 +1,7 @@
 ---
 id: extending-preparer
 title: Create your own Preparer
+description: Documentation on Creating your own Preparer
 ---
 
 Preparers are responsible for reading the location of the definition of a
@@ -14,10 +15,10 @@ location protocols:
 - `github://`
 
 These two are added to the `PreparersBuilder` and then passed into the
-`createRouter` function of the `@spotify/plugin-scaffolder-backend`
+`createRouter` function of the `@backstage/plugin-scaffolder-backend`.
 
-An full example backend can be found
-[here](https://github.com/spotify/backstage/blob/d91c10f654475a60829fa33a5c81018e517a319a/packages/backend/src/plugins/scaffolder.ts),
+A full example backend can be found in
+[`scaffolder.ts`](https://github.com/backstage/backstage/blob/d91c10f654475a60829fa33a5c81018e517a319a/packages/backend/src/plugins/scaffolder.ts),
 but it looks something like the following
 
 ```ts
@@ -55,7 +56,7 @@ when added to the service catalog. You can see more about this `PreparerKey`
 here in [Register your own template](../adding-templates.md)
 
 **note:** Currently the catalog supports loading definitions from GitHub + Local
-Files, which translate into the two `PreparerKeys` `file` and `github`. To load
+Files, which translate into the two `PreparerKeys`: `file` and `github`. To load
 from other places, not only will there need to be another preparer, but the
 support to load the location will also need to be added to the Catalog.
 
@@ -84,10 +85,10 @@ and put the contents into a temporary directory and return that directory path.
 
 Some good examples exist here:
 
-- https://github.com/spotify/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/stages/prepare/file.ts
-- https://github.com/spotify/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/stages/prepare/github.ts
+- https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/stages/prepare/file.ts
+- https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/stages/prepare/github.ts
 
-### Registerinng your own Preparer
+### Registering your own Preparer
 
 You can register the preparer that you have created with the `PreparerBuilder`
 by using the `PreparerKey` from the Catalog, for example like this:
@@ -97,4 +98,4 @@ const preparers = new Preparers();
 preparers.register('gcs', new GoogleCloudStoragePreparer());
 ```
 
-And then pass this in to the `createRouter` function.
+And then pass this into the `createRouter` function.

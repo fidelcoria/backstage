@@ -2,6 +2,8 @@
 id: well-known-annotations
 title: Well-known Annotations on Catalog Entities
 sidebar_label: Well-known Annotations
+# prettier-ignore
+description: Documentation that lists a number of well known Annotations, that have defined semantics. They can be attached to catalog entities and consumed by plugins as needed.
 ---
 
 This section lists a number of well known
@@ -20,7 +22,7 @@ use.
 # Example:
 metadata:
   annotations:
-    backstage.io/managed-by-location: github:http://github.com/spotify/backstage/catalog-info.yaml
+    backstage.io/managed-by-location: github:http://github.com/backstage/backstage/catalog-info.yaml
 ```
 
 The value of this annotation is a so called location reference string, that
@@ -44,20 +46,20 @@ colon is always present.
 # Example:
 metadata:
   annotations:
-    backstage.io/techdocs-ref: github:https://github.com/spotify/backstage.git
+    backstage.io/techdocs-ref: github:https://github.com/backstage/backstage.git
 ```
 
 The value of this annotation is a location reference string (see above). If this
 annotation is specified, it is expected to point to a repository that the
 TechDocs system can read and generate docs from.
 
-### backstage.io/jenkins-github-folder
+### jenkins.io/github-folder
 
 ```yaml
 # Example:
 metadata:
   annotations:
-    backstage.io/jenkins-github-folder: folder-name/job-name
+    jenkins.io/github-folder: folder-name/job-name
 ```
 
 The value of this annotation is the path to a job on Jenkins, that builds this
@@ -72,16 +74,53 @@ that entity.
 # Example:
 metadata:
   annotations:
-    github.com/project-slug: spotify/backstage
+    github.com/project-slug: backstage/backstage
 ```
 
 The value of this annotation is the so-called slug that identifies a project on
-[GitHub](https://github.com) that is related to this entity. It is on the format
+[GitHub](https://github.com) (either the public one, or a private GitHub
+Enterprise installation) that is related to this entity. It is on the format
 `<organization>/<project>`, and is the same as can be seen in the URL location
 bar of the browser when viewing that project.
 
 Specifying this annotation will enable GitHub related features in Backstage for
 that entity.
+
+### github.com/team-slug
+
+```yaml
+# Example:
+metadata:
+  annotations:
+    github.com/team-slug: backstage/maintainers
+```
+
+The value of this annotation is the so-called slug that identifies a team on
+[GitHub](https://github.com) (either the public one, or a private GitHub
+Enterprise installation) that is related to this entity. It is on the format
+`<organization>/<team>`, and is the same as can be seen in the URL location bar
+of the browser when viewing that team.
+
+This annotation can be used on a [Group entity](descriptor-format.md#kind-group)
+to note that it originated from that team on GitHub.
+
+### github.com/user-login
+
+```yaml
+# Example:
+metadata:
+  annotations:
+    github.com/user-login: freben
+```
+
+The value of this annotation is the so-called login that identifies a user on
+[GitHub](https://github.com) (either the public one, or a private GitHub
+Enterprise installation) that is related to this entity. It is on the format
+`<username>`, and is the same as can be seen in the URL location bar of the
+browser when viewing that user.
+
+This annotation can be used on a [User entity](descriptor-format.md#kind-user)
+to note that it originated from that user on GitHub.
 
 ### sentry.io/project-slug
 
@@ -106,7 +145,7 @@ that entity.
 # Example:
 metadata:
   annotations:
-    rollbar.com/project-slug: spotify/pump-station
+    rollbar.com/project-slug: backstage/pump-station
 ```
 
 The value of this annotation is the so-called slug (or alternatively, the ID) of
@@ -118,6 +157,74 @@ fallback (`rollbar.organization` followed by `organization.name`).
 Specifying this annotation may enable Rollbar related features in Backstage for
 that entity.
 
+### circleci.com/project-slug
+
+```yaml
+# Example:
+metadata:
+  annotations:
+    circleci.com/project-slug: github/spotify/pump-station
+```
+
+The value of this annotation is the so-called slug (or alternatively, the ID) of
+a [CircleCI](https://circleci.com/) project within your organization. The value
+can be the format of `[source-control-manager]/[organization]/[project-slug]` or
+just `[organization]/[project-slug]`. When the `[source-control-manager]` slug
+is omitted, `bitbucket` will be used as a fallback.
+
+Specifying this annotation will cause the CI/CD features in Backstage to display
+data from CircleCI for that entity.
+
+Providing both the `github.com/project-slug` and `circleci.com/project-slug`
+annotations can cause problems as both may be used for CI/CD features.
+
+### backstage.io/ldap-rdn, backstage.io/ldap-uuid, backstage.io/ldap-dn
+
+```yaml
+# Example:
+metadata:
+  annotations:
+    backstage.io/ldap-rdn: my-team
+    backstage.io/ldap-uuid: c57e8ba2-6cc4-1039-9ebc-d5f241a7ca21
+    backstage.io/ldap-dn: cn=my-team,ou=access,ou=groups,ou=spotify,dc=spotify,dc=net
+```
+
+The value of these annotations are the corresponding attributes that were found
+when ingesting the entity from LDAP. Not all of them may be present, depending
+on what attributes that the server presented at ingestion time.
+
+### graph.microsoft.com/tenant-id, graph.microsoft.com/group-id, graph.microsoft.com/user-id
+
+```yaml
+# Example:
+metadata:
+  annotations:
+    graph.microsoft.com/tenant-id: 6902611b-ffc1-463f-8af3-4d5285dc057b
+    graph.microsoft.com/group-id: c57e8ba2-6cc4-1039-9ebc-d5f241a7ca21
+    graph.microsoft.com/user-id: 2de244b5-104b-4e8f-a3b8-dce3c31e54b6
+```
+
+The value of these annotations are the corresponding attributes that were found
+when ingesting the entity from the Microsoft Graph API. Not all of them may be
+present, depending on what attributes that the server presented at ingestion
+time.
+
+### sonarqube.org/project-key
+
+```yaml
+# Example:
+metadata:
+  annotations:
+    sonarqube.org/project-key: pump-station
+```
+
+The value of this annotation is the project key of a
+[SonarQube](https://sonarqube.org) or [SonarCloud](https://sonarcloud.io)
+project within your organization.
+
+Specifying this annotation may enable SonarQube related features in Backstage
+for that entity.
+
 ## Deprecated Annotations
 
 The following annotations are deprecated, and only listed here to aid in
@@ -128,6 +235,12 @@ migrating away from them.
 This annotation was used for a while to enable the GitHub Actions feature. This
 is now instead using the [github.com/project-slug](#github-com-project-slug)
 annotation, with the same value format.
+
+### backstage.io/definition-at-location
+
+This annotation allowed to load the API definition from another location. Use
+[substitution](./descriptor-format.md#substitutions-in-the-descriptor-format)
+instead.
 
 ## Links
 

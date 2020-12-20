@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { FC } from 'react';
+import React from 'react';
 import { Button, Card, Chip, Typography, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   header: {
     color: theme.palette.common.white,
     padding: theme.spacing(2, 2, 6),
-    backgroundImage:
-      'linear-gradient(-137deg, rgb(25, 230, 140) 0%, rgb(29, 127, 110) 100%)',
+    backgroundImage: 'linear-gradient(-137deg,  #4BB8A5 0%,  #187656 100%)',
   },
   content: {
     padding: theme.spacing(2),
@@ -45,14 +44,14 @@ type ItemCardProps = {
   label: string;
   onClick?: () => void;
 };
-export const ItemCard: FC<ItemCardProps> = ({
+export const ItemCard = ({
   description,
   tags,
   title,
   type,
   label,
   onClick,
-}) => {
+}: ItemCardProps) => {
   const classes = useStyles();
 
   return (
@@ -62,8 +61,8 @@ export const ItemCard: FC<ItemCardProps> = ({
         <Typography variant="h6">{title}</Typography>
       </div>
       <div className={classes.content}>
-        {tags?.map(tag => (
-          <Chip label={tag} key={tag} />
+        {tags?.map((tag, i) => (
+          <Chip label={tag} key={`tag-${i}`} />
         ))}
         <Typography variant="body2" paragraph className={classes.description}>
           {description}

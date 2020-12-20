@@ -2,12 +2,14 @@
 id: software-templates-index
 title: Backstage Software Templates
 sidebar_label: Overview
+description: The Software Templates part of Backstage is a tool that can help
+you create Components inside Backstage
 ---
 
 The Software Templates part of Backstage is a tool that can help you create
 Components inside Backstage. By default, it has the ability to load skeletons of
-code, template in some variables, and then publish the template to some location
-like GitHub.
+code, template in some variables, and then publish the template to some
+locations like GitHub or GitLab.
 
 <video width="100%" height="100%" controls>
   <source src="https://backstage.io/blog/assets/2020-08-05/feature.mp4" type="video/mp4">
@@ -37,15 +39,17 @@ internally.
 ![Enter some variables](../../assets/software-templates/template-picked.png)
 
 After filling in these variables, you'll get some more fields to fill out which
-are required for backstage usage: the owner, (which is a `user` in the backstage
-system), the `storePath` (which right now must be a GitHub Organisation), and a
-non-existing github repository name in the format `organisation/reponame`.
+are required for backstage usage: the owner (which is a `user` in the backstage
+system), the `storePath` (which right now must be a GitHub Organisation or
+GitHub user and a non-existing GitHub repository name in the format
+`organisation/reponame`), and a GitHub team or user account which should be
+granted admin access to the repository.
 
 ![Enter backstage vars](../../assets/software-templates/template-picked-2.png)
 
 ### Run!
 
-Once you've entered values and confirmed, you'll then get a modal with live
+Once you've entered values and confirmed, you'll then get a popup box with live
 progress of what is currently happening with the creation of your template.
 
 ![Templating Running](../../assets/software-templates/running.png)
@@ -66,6 +70,6 @@ you to the registered component in the catalog:
 
 ![Catalog](../../assets/software-templates/go-to-catalog.png)
 
-And then you'll also be able to see it in the Catalog View table
+And then you'll also be able to see it in the Catalog View table:
 
 ![Catalog](../../assets/software-templates/added-to-the-catalog-list.png)

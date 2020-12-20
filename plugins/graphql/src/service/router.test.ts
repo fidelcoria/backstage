@@ -13,10 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './router';
+import { createRouter } from './router';
+import supertest from 'supertest';
+import { ConfigReader } from '@backstage/config';
+import { createLogger } from 'winston';
+import express from 'express';
 
 describe('Router', () => {
-  it('should pass the test', () => {
-    expect(true).toBeTruthy();
+  describe('/health', () => {
+    it('should return ok', async () => {
+      const config = new ConfigReader({ backend: { baseUrl: 'lol' } });
+
+      const router = await createRouter({ config, logger: createLogger() });
+      const app = express().use(router);
+
+      const { body } = await supertest(app).get('/health');
+
+      expect(body).toEqual({ status: 'ok' });
+    });
   });
 });

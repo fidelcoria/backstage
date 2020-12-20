@@ -1,7 +1,7 @@
 ---
 id: adrs-adr002
 title: ADR002: Default Software Catalog File Format
-sidebar_label: ADR002
+description: Architecture Decision Record (ADR) log on Default Software Catalog File Format
 ---
 
 | Created    | Status |
@@ -22,7 +22,7 @@ This ADR describes the default format of these descriptor files.
 
 ### Inspiration
 
-Internally at Spotify, a home grown software catalog system is used heavily and
+Internally at Spotify, a homegrown software catalog system is used heavily and
 forms a core part of Backstage and other important pieces of the infrastructure.
 The user experience, learnings and certain pieces of metadata from that catalog
 are being carried over to the open source effort.
@@ -39,8 +39,8 @@ inside Backstage, or by push events from a CI/CD pipelines, or by webhook
 triggers from the version control system, etc.
 
 Each file describes one or more entities in accordance with the
-[Backstage System Model](https://github.com/spotify/backstage/issues/390). All
-of these entities have a common stucture and nomenclature, and they are stored
+[Backstage System Model](https://github.com/backstage/backstage/issues/390). All
+of these entities have a common structure and nomenclature, and they are stored
 in the software catalog from which they then can be queried.
 
 Entities have distinct names, and they may reference each other by those names.
@@ -87,7 +87,7 @@ The root envelope object has the following structure.
 ### `apiVersion` and `kind`
 
 The `kind` is the high level entity type being described, typically from the
-[Backstage system model](https://github.com/spotify/backstage/issues/390). The
+[Backstage system model](https://github.com/backstage/backstage/issues/390). The
 first versions of the catalog will focus on the `Component` kind.
 
 The `apiVersion`is the version of specification format for that particular

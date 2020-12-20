@@ -35,7 +35,12 @@ import {
   createApiFactory,
   configApiRef,
 } from '@backstage/core';
-import { techdocsStorageApiRef, TechDocsStorageApi } from './api';
+import {
+  techdocsStorageApiRef,
+  TechDocsStorageApi,
+  techdocsApiRef,
+  TechDocsApi,
+} from './api';
 
 export const rootRouteRef = createRouteRef({
   path: '',
@@ -43,7 +48,7 @@ export const rootRouteRef = createRouteRef({
 });
 
 export const rootDocsRouteRef = createRouteRef({
-  path: ':entityId/*',
+  path: ':namespace/:kind/:name/*',
   title: 'Docs',
 });
 
@@ -52,6 +57,7 @@ export const rootCatalogDocsRouteRef = createRouteRef({
   title: 'Docs',
 });
 
+// TODO: Use discovery API for frontend to get URL for techdocs-backend instead of requestUrl
 export const plugin = createPlugin({
   id: 'techdocs',
   apis: [
@@ -60,6 +66,14 @@ export const plugin = createPlugin({
       deps: { configApi: configApiRef },
       factory: ({ configApi }) =>
         new TechDocsStorageApi({
+          apiOrigin: configApi.getString('techdocs.requestUrl'),
+        }),
+    }),
+    createApiFactory({
+      api: techdocsApiRef,
+      deps: { configApi: configApiRef },
+      factory: ({ configApi }) =>
+        new TechDocsApi({
           apiOrigin: configApi.getString('techdocs.requestUrl'),
         }),
     }),

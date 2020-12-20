@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [12.x, 14.x]
 
     env:
       CI: true
@@ -37,7 +37,7 @@ jobs:
           path: '**/node_modules'
           # We use both yarn.lock and package.json as cache keys to ensure that
           # changes to local monorepo packages bust the cache.
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('yarn.lock', '**/package.json') }}
+          key: ${{ runner.os }}-v${{ matrix.node-version }}-node_modules-${{ hashFiles('yarn.lock', '**/package.json') }}
 
       # If we get a cache hit for node_modules, there's no need to bring in the global
       # yarn cache or run yarn install, as all dependencies will be installed already.
@@ -67,10 +67,13 @@ jobs:
         continue-on-error: true
 
       - name: verify doc links
-        run: node docs/verify-links.js
+        run: node scripts/verify-links.js
 
       - name: prettier
         run: yarn prettier:check
+
+      - name: validate config
+        run: yarn backstage-cli config:check
 
       - name: lint
         run: yarn lerna -- run lint --since origin/master
@@ -97,7 +100,7 @@ jobs:
         if: ${{ steps.yarn-lock.outcome == 'failure' }}
         run: |
           yarn lerna -- run test -- --coverage
-          bash <(curl -s https://codecov.io/bash)
+          bash <(curl -s https://codecov.io/bash) -N $(git rev-parse FETCH_HEAD)
 
       - name: verify plugin template
         run: yarn lerna -- run diff -- --check

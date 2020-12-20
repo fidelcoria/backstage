@@ -1,7 +1,7 @@
 # ProfileInfoApi
 
 The ProfileInfoApi type is defined at
-[packages/core-api/src/apis/definitions/auth.ts:127](https://github.com/spotify/backstage/blob/82d329555c16af46db9b4e5cd2f44a3cc006a52e/packages/core-api/src/apis/definitions/auth.ts#L127).
+[packages/core-api/src/apis/definitions/auth.ts:117](https://github.com/backstage/backstage/blob/ca535f2f66c3a4980c80f4b1a049dfd07569010e/packages/core-api/src/apis/definitions/auth.ts#L117).
 
 The following Utility APIs implement this type:
 
@@ -18,6 +18,8 @@ The following Utility APIs implement this type:
 - [oauth2ApiRef](./README.md#oauth2)
 
 - [oktaAuthApiRef](./README.md#oktaauth)
+
+- [samlAuthApiRef](./README.md#samlauth)
 
 ## Members
 
@@ -65,7 +67,7 @@ export type AuthRequestOptions = {
 </pre>
 
 Defined at
-[packages/core-api/src/apis/definitions/auth.ts:40](https://github.com/spotify/backstage/blob/82d329555c16af46db9b4e5cd2f44a3cc006a52e/packages/core-api/src/apis/definitions/auth.ts#L40).
+[packages/core-api/src/apis/definitions/auth.ts:40](https://github.com/backstage/backstage/blob/ca535f2f66c3a4980c80f4b1a049dfd07569010e/packages/core-api/src/apis/definitions/auth.ts#L40).
 
 Referenced by: [getProfile](#getprofile).
 
@@ -93,6 +95,6 @@ export type ProfileInfo = {
 </pre>
 
 Defined at
-[packages/core-api/src/apis/definitions/auth.ts:172](https://github.com/spotify/backstage/blob/82d329555c16af46db9b4e5cd2f44a3cc006a52e/packages/core-api/src/apis/definitions/auth.ts#L172).
+[packages/core-api/src/apis/definitions/auth.ts:162](https://github.com/backstage/backstage/blob/ca535f2f66c3a4980c80f4b1a049dfd07569010e/packages/core-api/src/apis/definitions/auth.ts#L162).
 
 Referenced by: [getProfile](#getprofile).

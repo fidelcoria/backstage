@@ -14,71 +14,99 @@
  * limitations under the License.
  */
 
-import { PublisherBase } from './types';
+import { PublisherBase, PublisherOptions, PublisherResult } from './types';
 import { Octokit } from '@octokit/rest';
-
+import { pushToRemoteUserPass } from './helpers';
 import { JsonValue } from '@backstage/config';
 import { RequiredTemplateValues } from '../templater';
-import { Repository, Remote, Signature, Cred } from 'nodegit';
+
+export type RepoVisibilityOptions = 'private' | 'internal' | 'public';
+
+interface GithubPublisherParams {
+  client: Octokit;
+  token: string;
+  repoVisibility: RepoVisibilityOptions;
+}
 
 export class GithubPublisher implements PublisherBase {
   private client: Octokit;
-  constructor({ client }: { client: Octokit }) {
+  private token: string;
+  private repoVisibility: RepoVisibilityOptions;
+
+  constructor({
+    client,
+    token,
+    repoVisibility = 'public',
+  }: GithubPublisherParams) {
     this.client = client;
+    this.token = token;
+    this.repoVisibility = repoVisibility;
   }
 
   async publish({
     values,
     directory,
-  }: {
-    values: RequiredTemplateValues & Record<string, JsonValue>;
-    directory: string;
-  }): Promise<{ remoteUrl: string }> {
+  }: PublisherOptions): Promise<PublisherResult> {
     const remoteUrl = await this.createRemote(values);
-    await this.pushToRemote(directory, remoteUrl);
+    await pushToRemoteUserPass(
+      directory,
+      remoteUrl,
+      this.token,
+      'x-oauth-basic',
+    );
+    const catalogInfoUrl = remoteUrl.replace(
+      /\.git$/,
+      '/blob/master/catalog-info.yaml',
+    );
 
-    return { remoteUrl };
+    return { remoteUrl, catalogInfoUrl };
   }
 
   private async createRemote(
     values: RequiredTemplateValues & Record<string, JsonValue>,
   ) {
     const [owner, name] = values.storePath.split('/');
+    const description = values.description as string;
 
-    const repoCreationPromise = values.isOrg
-      ? this.client.repos.createInOrg({ name, org: owner })
-      : this.client.repos.createForAuthenticatedUser({ name });
+    const user = await this.client.users.getByUsername({ username: owner });
+
+    const repoCreationPromise =
+      user.data.type === 'Organization'
+        ? this.client.repos.createInOrg({
+            name,
+            org: owner,
+            private: this.repoVisibility !== 'public',
+            visibility: this.repoVisibility,
+            description,
+          })
+        : this.client.repos.createForAuthenticatedUser({
+            name,
+            private: this.repoVisibility === 'private',
+            description,
+          });
 
     const { data } = await repoCreationPromise;
 
+    const access = values.access as string;
+    if (access?.startsWith(`${owner}/`)) {
+      const [, team] = access.split('/');
+      await this.client.teams.addOrUpdateRepoPermissionsInOrg({
+        org: owner,
+        team_slug: team,
+        owner,
+        repo: name,
+        permission: 'admin',
+      });
+      // no need to add access if it's the person who own's the personal account
+    } else if (access && access !== owner) {
+      await this.client.repos.addCollaborator({
+        owner,
+        repo: name,
+        username: access,
+        permission: 'admin',
+      });
+    }
+
     return data?.clone_url;
-  }
-
-  private async pushToRemote(directory: string, remote: string): Promise<void> {
-    const repo = await Repository.init(directory, 0);
-    const index = await repo.refreshIndex();
-    await index.addAll();
-    await index.write();
-    const oid = await index.writeTree();
-    await repo.createCommit(
-      'HEAD',
-      Signature.now('Scaffolder', 'scaffolder@backstage.io'),
-      Signature.now('Scaffolder', 'scaffolder@backstage.io'),
-      'initial commit',
-      oid,
-      [],
-    );
-
-    const remoteRepo = await Remote.create(repo, 'origin', remote);
-    await remoteRepo.push(['refs/heads/master:refs/heads/master'], {
-      callbacks: {
-        credentials: () => {
-          return Cred.userpassPlaintextNew(
-            process.env.GITHUB_ACCESS_TOKEN as string,
-            'x-oauth-basic',
-          );
-        },
-      },
-    });
   }
 }

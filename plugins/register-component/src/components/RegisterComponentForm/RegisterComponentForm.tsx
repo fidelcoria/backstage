@@ -23,7 +23,7 @@ import {
   TextField,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import React, { FC } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { ComponentIdValidators } from '../../util/validate';
 
@@ -33,30 +33,45 @@ const useStyles = makeStyles<BackstageTheme>(theme => ({
     display: 'flex',
     flexFlow: 'column nowrap',
   },
-  submit: {
-    marginTop: theme.spacing(1),
+  buttonSpacing: {
+    marginLeft: theme.spacing(1),
+  },
+  buttons: {
+    marginTop: theme.spacing(2),
+  },
+  select: {
+    minWidth: 120,
   },
 }));
 
 export type Props = {
   onSubmit: (formData: Record<string, string>) => Promise<void>;
-  submitting: boolean;
+  submitting?: boolean;
 };
 
-const RegisterComponentForm: FC<Props> = ({ onSubmit, submitting }) => {
+export const RegisterComponentForm = ({ onSubmit, submitting }: Props) => {
   const { register, handleSubmit, errors, formState } = useForm({
     mode: 'onChange',
   });
   const classes = useStyles();
-  const hasErrors = !!errors.componentLocation;
+  const hasErrors = !!errors.entityLocation;
   const dirty = formState?.isDirty;
+
+  const onSubmitValidate = handleSubmit(data => {
+    data.mode = 'validate';
+    onSubmit(data);
+  });
+
+  const onSubmitRegister = handleSubmit(data => {
+    data.mode = 'register';
+    onSubmit(data);
+  });
 
   return submitting ? (
     <LinearProgress data-testid="loading-progress" />
   ) : (
     <form
       autoComplete="off"
-      onSubmit={handleSubmit(onSubmit)}
       className={classes.form}
       data-testid="register-form"
     >
@@ -64,38 +79,47 @@ const RegisterComponentForm: FC<Props> = ({ onSubmit, submitting }) => {
         <TextField
           id="registerComponentInput"
           variant="outlined"
-          label="Component file URL"
-          data-testid="componentLocationInput"
+          label="Entity file URL"
           error={hasErrors}
-          placeholder="https://example.com/user/some-service/blob/master/component.yaml"
-          name="componentLocation"
+          placeholder="https://example.com/user/some-service/blob/master/catalog-info.yaml"
+          name="entityLocation"
           required
           margin="normal"
-          helperText="Enter the full path to the component.yaml file in GitHub, GitLab, Bitbucket or Azure to start tracking your component."
+          helperText="Enter the full path to the catalog-info.yaml file in GitHub, GitLab, Bitbucket or Azure to start tracking your component."
           inputRef={register({
             required: true,
             validate: ComponentIdValidators,
           })}
         />
 
-        {errors.componentLocation && (
+        {errors.entityLocation && (
           <FormHelperText error={hasErrors} id="register-component-helper-text">
-            {errors.componentLocation.message}
+            {errors.entityLocation.message}
           </FormHelperText>
         )}
       </FormControl>
-      <Button
-        id="registerComponentFormSubmit"
-        variant="contained"
-        color="primary"
-        type="submit"
-        disabled={!dirty || hasErrors}
-        className={classes.submit}
-      >
-        Submit
-      </Button>
+
+      <div className={classes.buttons}>
+        <Button
+          variant="outlined"
+          color="primary"
+          type="submit"
+          disabled={!dirty || hasErrors}
+          onClick={onSubmitValidate}
+        >
+          Validate
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          className={classes.buttonSpacing}
+          disabled={!dirty || hasErrors}
+          onClick={onSubmitRegister}
+        >
+          Register
+        </Button>
+      </div>
     </form>
   );
 };
-
-export default RegisterComponentForm;

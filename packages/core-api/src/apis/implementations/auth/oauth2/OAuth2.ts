@@ -20,11 +20,6 @@ import { RefreshingAuthSessionManager } from '../../../../lib/AuthSessionManager
 import { SessionManager } from '../../../../lib/AuthSessionManager/types';
 import { Observable } from '../../../../types';
 import {
-  AuthProvider,
-  OAuthRequestApi,
-  DiscoveryApi,
-} from '../../../definitions';
-import {
   AuthRequestOptions,
   BackstageIdentity,
   OAuthApi,
@@ -32,23 +27,18 @@ import {
   ProfileInfo,
   ProfileInfoApi,
   SessionState,
-  SessionStateApi,
+  SessionApi,
   BackstageIdentityApi,
 } from '../../../definitions/auth';
 import { OAuth2Session } from './types';
+import { OAuthApiCreateOptions } from '../types';
 
 type Options = {
   sessionManager: SessionManager<OAuth2Session>;
   scopeTransform: (scopes: string[]) => string[];
 };
 
-type CreateOptions = {
-  discoveryApi: DiscoveryApi;
-  oauthRequestApi: OAuthRequestApi;
-
-  environment?: string;
-  provider?: AuthProvider & { id: string };
-  defaultScopes?: string[];
+type CreateOptions = OAuthApiCreateOptions & {
   scopeTransform?: (scopes: string[]) => string[];
 };
 
@@ -75,7 +65,7 @@ class OAuth2
     OpenIdConnectApi,
     ProfileInfoApi,
     BackstageIdentityApi,
-    SessionStateApi {
+    SessionApi {
   static create({
     discoveryApi,
     environment = 'development',
@@ -129,6 +119,14 @@ class OAuth2
     this.scopeTransform = options.scopeTransform;
   }
 
+  async signIn() {
+    await this.getAccessToken();
+  }
+
+  async signOut() {
+    await this.sessionManager.removeSession();
+  }
+
   sessionState$(): Observable<SessionState> {
     return this.sessionManager.sessionState$();
   }
@@ -148,10 +146,6 @@ class OAuth2
   async getIdToken(options: AuthRequestOptions = {}) {
     const session = await this.sessionManager.getSession(options);
     return session?.providerInfo.idToken ?? '';
-  }
-
-  async logout() {
-    await this.sessionManager.removeSession();
   }
 
   async getBackstageIdentity(

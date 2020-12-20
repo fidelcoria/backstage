@@ -1,11 +1,13 @@
 site_name: 'Backstage'
 site_description: 'Main documentation for Backstage features and platform APIs'
 
+plugins:
+  - techdocs-core
+
 nav:
   - Overview:
       - What is Backstage?: 'overview/what-is-backstage.md'
       - Backstage architecture: 'overview/architecture-overview.md'
-      - Architecture and terminology: 'overview/architecture-terminology.md'
       - Roadmap: 'overview/roadmap.md'
       - Vision: 'overview/vision.md'
       - The Spotify story: 'overview/background.md'
@@ -14,7 +16,6 @@ nav:
   - Getting started:
       - Getting Started: 'getting-started/index.md'
       - Running Backstage locally: 'getting-started/running-backstage-locally.md'
-      - Installation: 'getting-started/installation.md'
       - Local development: 'getting-started/development-environment.md'
       - Demo deployment: https://backstage-demo.roadie.io
       - Production deployments:
@@ -24,14 +25,17 @@ nav:
               - Customize the look-and-feel of your App: 'getting-started/app-custom-theme.md'
           - Deployment scenarios:
               - Kubernetes: 'getting-started/deployment-k8s.md'
+              - Kubernetes and Helm: 'getting-started/deployment-helm.md'
               - Other: 'getting-started/deployment-other.md'
   - Features:
       - Software Catalog:
           - Overview: 'features/software-catalog/index.md'
+          - Installation: 'features/software-catalog/installation.md'
+          - Configuration: 'features/software-catalog/configuration.md'
           - System model: 'features/software-catalog/system-model.md'
           - YAML File Format: 'features/software-catalog/descriptor-format.md'
+          - Entity References: 'features/software-catalog/references.md'
           - Well-known Annotations: 'features/software-catalog/well-known-annotations.md'
-          - Configuration: 'features/software-catalog/configuration.md'
           - Extending the model: 'features/software-catalog/extending-the-model.md'
           - External integrations: 'features/software-catalog/external-integrations.md'
           - API: 'features/software-catalog/api.md'
@@ -50,6 +54,9 @@ nav:
           - Concepts: 'features/techdocs/concepts.md'
           - TechDocs Architecture: 'features/techdocs/architecture.md'
           - Creating and Publishing Documentation: 'features/techdocs/creating-and-publishing.md'
+          - Configuration: 'features/techdocs/configuration.md'
+          - Using Cloud Storage: 'features/techdocs/using-cloud-storage.md'
+          - Troubleshooting: 'features/techdocs/troubleshooting.md'
           - FAQ: 'features/techdocs/FAQ.md'
   - Plugins:
       - Overview: 'plugins/index.md'
@@ -64,7 +71,7 @@ nav:
       - Testing:
           - Overview: 'plugins/testing.md'
       - Publishing:
-          - Open source and NPM: 'plugins/publishing.md'
+          - Open source and npm: 'plugins/publishing.md'
           - Private/internal (non-open source): 'plugins/publish-private.md'
   - Configuration:
       - Overview: 'conf/index.md'
@@ -103,9 +110,9 @@ nav:
       - ADR006 - Avoid React.FC and React.SFC: 'architecture-decisions/adr006-avoid-react-fc.md'
       - ADR007 - Use MSW for Network Request Mocking: 'architecture-decisions/adr007-use-msw-to-mock-service-requests.md'
       - ADR008 - Default Catalog File Name: 'architecture-decisions/adr008-default-catalog-file-name.md'
+      - ADR009 - Entity References: 'architecture-decisions/adr009-entity-references.md'
   - Contribute: '../CONTRIBUTING.md'
-  - Support: 'overview/support.md'
+  - Support:
+      - 'support/support.md'
+      - 'support/project-structure.md'
   - FAQ: FAQ.md
-
-plugins:
-  - techdocs-core
